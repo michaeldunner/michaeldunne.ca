@@ -121,3 +121,10 @@
     @apply bg-background text-foreground;
   }
 }
+
+@font-face {
+  font-family: "Pokemon";
+  src: url("./assets/fonts/Pokemon.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
