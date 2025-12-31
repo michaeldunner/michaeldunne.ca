@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "../ui/sidebar";
 import {
   IconArrowLeft,
@@ -41,14 +41,24 @@ export function MySidebar() {
     },
   ];
   const [open, setOpen] = useState(false);
-return (
+
+  // prevent body scrolling while this fullscreen sidebar overlay is mounted
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev || "";
+    };
+  }, []);
+
+  return (
     // fixed fullscreen container so the sidebar module truly spans the viewport
-    <div className="fixed inset-0 z-50 flex h-screen">
+    <div className="fixed inset-0 z-50 flex h-screen overflow-hidden">
       {/* Left wrapper uses the collapsed width and allows the inner sidebar to overflow */}
       <div className="relative w-[60px] flex-shrink-0 h-full overflow-visible">
         <Sidebar open={open} setOpen={setOpen} animate={true}>
           <SidebarBody className="justify-between gap-10 h-full">
-            <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
+            <div className="flex flex-1 flex-col overflow-hidden">
               <Logo />
               <div className="mt-8 flex flex-col gap-2">
                 {links.map((link, idx) => (
@@ -61,10 +71,10 @@ return (
         </Sidebar>
       </div>
 
-      {/* Main content area — margin matches collapsed width, transitions when open */}
+      {/* Main content area — clipped to viewport, no page scroll */}
       <div
         className={cn(
-          "flex-1 h-full overflow-auto bg-neutral-50 dark:bg-neutral-800 transition-all duration-200",
+          "flex-1 h-full bg-neutral-50 dark:bg-neutral-800 transition-all duration-200 overflow-hidden",
           open ? "ml-[90px]" : "ml-[0px]"
         )}
       >
@@ -79,8 +89,6 @@ export const Logo = () => {
       href="#"
       className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black"
     >
-      {/* <div className="h-5 w-6 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-black dark:bg-white" /> */}
-
       <IconTerminal className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       <motion.span
         initial={{ opacity: 0 }}
