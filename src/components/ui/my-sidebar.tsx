@@ -1,11 +1,7 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "../ui/sidebar";
 import {
-  IconArrowLeft,
-  IconBrandTabler,
-  IconSettings,
-  IconUserBolt,
   IconTerminal,
   IconBrandLinkedin,
   IconBrandGithub,
@@ -13,7 +9,6 @@ import {
 } from "@tabler/icons-react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
-import { EncryptedText } from "./encrypted-text";
 import Home from "./home";
 
 export function MySidebar() {
@@ -75,7 +70,7 @@ export function MySidebar() {
       <div
         className={cn(
           "flex-1 h-full bg-neutral-50 dark:bg-neutral-800 transition-all duration-200 overflow-hidden",
-          open ? "ml-[90px]" : "ml-[0px]"
+          open ? "ml-[90px]" : "ml-[0px]",
         )}
       >
         <Dashboard />
