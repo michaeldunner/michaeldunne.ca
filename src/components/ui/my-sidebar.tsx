@@ -6,6 +6,10 @@ import {
   IconBrandTabler,
   IconSettings,
   IconUserBolt,
+  IconTerminal,
+  IconBrandLinkedin,
+  IconBrandGithub,
+  IconBrandLetterboxd,
 } from "@tabler/icons-react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
@@ -15,31 +19,24 @@ import Home from "./home";
 export function MySidebar() {
   const links = [
     {
-      label: "Dashboard",
-      href: "#",
+      label: "Linkedin",
+      href: "/linkedin",
       icon: (
-        <IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+        <IconBrandLinkedin className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
     {
-      label: "Profile",
-      href: "#",
+      label: "Github",
+      href: "/github",
       icon: (
-        <IconUserBolt className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+        <IconBrandGithub className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
     {
-      label: "Settings",
-      href: "#",
+      label: "Letterboxd",
+      href: "/letterboxd",
       icon: (
-        <IconSettings className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
-    },
-    {
-      label: "Logout",
-      href: "#",
-      icon: (
-        <IconArrowLeft className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+        <IconBrandLetterboxd className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
   ];
@@ -64,7 +61,8 @@ export function MySidebar() {
             </div>
           </div>
           <div>
-            <SidebarLink
+            {/* this is kinda cool but website doesnt have users */}
+            {/* <SidebarLink
               link={{
                 label: "Manu Arora",
                 href: "#",
@@ -78,7 +76,7 @@ export function MySidebar() {
                   />
                 ),
               }}
-            />
+            /> */}
           </div>
         </SidebarBody>
       </Sidebar>
@@ -92,13 +90,15 @@ export const Logo = () => {
       href="#"
       className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black"
     >
-      <div className="h-5 w-6 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-black dark:bg-white" />
+      {/* <div className="h-5 w-6 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-black dark:bg-white" /> */}
+
+      <IconTerminal className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       <motion.span
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="font-medium whitespace-pre text-black dark:text-white"
       >
-        Acet Labs
+        Platforms
       </motion.span>
     </a>
   );
