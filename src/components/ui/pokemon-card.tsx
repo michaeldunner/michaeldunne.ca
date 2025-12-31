@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { GlareCard } from "../ui/glare-card";
+import { TiltCard } from "./tilt-card";
 
 type PokemonCardProps = {
   imageURL?: string;
@@ -19,19 +20,22 @@ export function PokemonCard({
       to={to || "#"}
       className="cursor-pointer focus:outline-none hover:opacity-90 transition-opacity block"
     >
+        <TiltCard>
+
       <div
         className={`flex w-[315px] h-[440px] rounded-2xl border-16 border-yellow-400 ${colour ?? ""} p-4 justify-center`}
-      >
+        >
         <div className="flex flex-col mt-4 gap-4">
           <GlareCard className="flex flex-col items-center justify-center">
             <img
               className="h-full w-full absolute inset-0 object-cover"
               src={imageURL}
-            />
+              />
           </GlareCard>
           <p className="text-black dark:text-black text-xl">{text}</p>
         </div>
       </div>
+              </TiltCard>
     </Link>
   );
 }
