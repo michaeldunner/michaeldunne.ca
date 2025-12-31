@@ -20,7 +20,7 @@ export function MySidebar() {
   const links = [
     {
       label: "Linkedin",
-      href: "/linkedin",
+      href: "https://www.linkedin.com/in/michaeldunner",
       icon: (
         <IconBrandLinkedin className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
@@ -41,46 +41,35 @@ export function MySidebar() {
     },
   ];
   const [open, setOpen] = useState(false);
-  return (
-    <div
-      className={cn(
-        " flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row dark:border-neutral-700 dark:bg-neutral-800",
-        "h-screen", // for your use case, use `h-screen` instead of `h-[60vh]`
-      )}
-    >
-      <Sidebar open={open} setOpen={setOpen} animate={true}>
-        <SidebarBody className="justify-between gap-10">
-          <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
-            <>
+return (
+    // fixed fullscreen container so the sidebar module truly spans the viewport
+    <div className="fixed inset-0 z-50 flex h-screen">
+      {/* Left wrapper uses the collapsed width and allows the inner sidebar to overflow */}
+      <div className="relative w-[60px] flex-shrink-0 h-full overflow-visible">
+        <Sidebar open={open} setOpen={setOpen} animate={true}>
+          <SidebarBody className="justify-between gap-10 h-full">
+            <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
               <Logo />
-            </>
-            <div className="mt-8 flex flex-col gap-2">
-              {links.map((link, idx) => (
-                <SidebarLink key={idx} link={link} />
-              ))}
+              <div className="mt-8 flex flex-col gap-2">
+                {links.map((link, idx) => (
+                  <SidebarLink key={idx} link={link} />
+                ))}
+              </div>
             </div>
-          </div>
-          <div>
-            {/* this is kinda cool but website doesnt have users */}
-            {/* <SidebarLink
-              link={{
-                label: "Manu Arora",
-                href: "#",
-                icon: (
-                  <img
-                    src="https://assets.aceternity.com/manu.png"
-                    className="h-7 w-7 shrink-0 rounded-full"
-                    width={50}
-                    height={50}
-                    alt="Avatar"
-                  />
-                ),
-              }}
-            /> */}
-          </div>
-        </SidebarBody>
-      </Sidebar>
-      <Dashboard />
+            <div />
+          </SidebarBody>
+        </Sidebar>
+      </div>
+
+      {/* Main content area — margin matches collapsed width, transitions when open */}
+      <div
+        className={cn(
+          "flex-1 h-full overflow-auto bg-neutral-50 dark:bg-neutral-800 transition-all duration-200",
+          open ? "ml-[90px]" : "ml-[0px]"
+        )}
+      >
+        <Dashboard />
+      </div>
     </div>
   );
 }
@@ -96,7 +85,7 @@ export const Logo = () => {
       <motion.span
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="font-medium whitespace-pre text-black dark:text-white"
+        className="font-medium whitespace-pre text-neutral-700 dark:text-neutral-200"
       >
         Platforms
       </motion.span>
