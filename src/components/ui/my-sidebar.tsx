@@ -27,14 +27,14 @@ export function MySidebar() {
     },
     {
       label: "Github",
-      href: "/github",
+      href: "https://www.github.com/michaeldunner",
       icon: (
         <IconBrandGithub className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
     },
     {
       label: "Letterboxd",
-      href: "/letterboxd",
+      href: "https://letterboxd.com/michaeldunner/",
       icon: (
         <IconBrandLetterboxd className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
