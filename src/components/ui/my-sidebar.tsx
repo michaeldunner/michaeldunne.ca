@@ -48,9 +48,9 @@ export function MySidebar() {
 
   return (
     // fixed fullscreen container so the sidebar module truly spans the viewport
-    <div className="fixed inset-0 z-50 flex h-screen overflow-hidden">
+    <div className="fixed inset-0 z-50 flex h-screen flex-col md:flex-row overflow-hidden">
       {/* Left wrapper uses the collapsed width and allows the inner sidebar to overflow */}
-      <div className="relative w-[60px] flex-shrink-0 h-full overflow-visible">
+      <div className="relative w-full h-auto md:w-[60px] md:flex-shrink-0 md:h-full overflow-visible">
         <Sidebar open={open} setOpen={setOpen} animate={true}>
           <SidebarBody className="justify-between gap-10 h-full">
             <div className="flex flex-1 flex-col overflow-hidden">
@@ -69,8 +69,8 @@ export function MySidebar() {
       {/* Main content area — clipped to viewport, no page scroll */}
       <div
         className={cn(
-          "flex-1 h-full bg-neutral-50 dark:bg-neutral-800 transition-all duration-200 overflow-hidden",
-          open ? "ml-[90px]" : "ml-[0px]",
+          "flex-1 h-full bg-neutral-50 dark:bg-neutral-800 transition-all duration-200 overflow-y-auto md:overflow-hidden",
+          open ? "md:ml-[90px]" : "md:ml-[0px]",
         )}
       >
         <Dashboard />

@@ -1,13 +1,17 @@
 import { cn } from "@/lib/utils";
-import { useRef } from "react";
+import { useRef, forwardRef, useImperativeHandle } from "react";
 
-export const GlareCard = ({
-  children,
-  className,
-}: {
+export interface GlareCardApi {
+  updateGlare: (x: number, y: number, active: boolean) => void;
+}
+
+export const GlareCard = forwardRef<GlareCardApi, {
   children: React.ReactNode;
   className?: string;
-}) => {
+}>(({
+  children,
+  className,
+}, ref) => {
   const isPointerInside = useRef(false);
   const refElement = useRef<HTMLDivElement>(null);
   const state = useRef({
@@ -24,6 +28,36 @@ export const GlareCard = ({
       y: 0,
     },
   });
+
+  useImperativeHandle(ref, () => ({
+    updateGlare: (x, y, active) => {
+      if (!refElement.current) return;
+
+      const { background, glare } = state.current;
+
+      // Update state
+      glare.x = x;
+      glare.y = y;
+      background.x = 50 + x / 4 - 12.5;
+      background.y = 50 + y / 3 - 16.67;
+
+      // Update opacity and duration
+      if (active) {
+        refElement.current.style.setProperty("--opacity", "0.6");
+        refElement.current.style.setProperty("--duration", "0s");
+      } else {
+        refElement.current.style.setProperty("--opacity", "0");
+        refElement.current.style.removeProperty("--duration");
+      }
+
+      // Update positions
+      refElement.current.style.setProperty("--m-x", `${glare.x}%`);
+      refElement.current.style.setProperty("--m-y", `${glare.y}%`);
+      refElement.current.style.setProperty("--bg-x", `${background.x}%`);
+      refElement.current.style.setProperty("--bg-y", `${background.y}%`);
+    }
+  }));
+
   const containerStyle = {
     "--m-x": "50%",
     "--m-y": "50%",
@@ -69,6 +103,9 @@ export const GlareCard = ({
       style={containerStyle}
       className="relative isolate [contain:layout_style] [perspective:600px] transition-transform duration-[var(--duration)] ease-[var(--easing)] delay-[var(--delay)] will-change-transform w-[250px] [aspect-ratio:4/3]" //adjust size
       ref={refElement}
+      // Note: We are keeping the internal listeners active. If the parent controls it, 
+      // the parent's updates will likely override these or run in parallel. 
+      // Ideally, pass a prop 'controlled' to disable these if needed. Both active is fine for now usually.
       onPointerMove={(event) => {
         const rotateFactor = 0.4;
         const rect = event.currentTarget.getBoundingClientRect();
@@ -129,4 +166,6 @@ export const GlareCard = ({
       </div>
     </div>
   );
-};
+});
+
+GlareCard.displayName = "GlareCard";
