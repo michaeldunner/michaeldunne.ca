@@ -54,8 +54,8 @@ export const TiltCard = ({
         };
 
         const { rotate } = state.current;
-        rotate.x = -(delta.x / 10);
-        rotate.y = delta.y / 10;
+        rotate.x = -(delta.x / -5);
+        rotate.y = delta.y / -5;
         rotate.x *= rotateFactor;
         rotate.y *= rotateFactor;
 
