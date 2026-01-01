@@ -5,13 +5,13 @@ export interface GlareCardApi {
   updateGlare: (x: number, y: number, active: boolean) => void;
 }
 
-export const GlareCard = forwardRef<GlareCardApi, {
-  children: React.ReactNode;
-  className?: string;
-}>(({
-  children,
-  className,
-}, ref) => {
+export const GlareCard = forwardRef<
+  GlareCardApi,
+  {
+    children: React.ReactNode;
+    className?: string;
+  }
+>(({ children, className }, ref) => {
   const isPointerInside = useRef(false);
   const refElement = useRef<HTMLDivElement>(null);
   const state = useRef({
@@ -55,7 +55,7 @@ export const GlareCard = forwardRef<GlareCardApi, {
       refElement.current.style.setProperty("--m-y", `${glare.y}%`);
       refElement.current.style.setProperty("--bg-x", `${background.x}%`);
       refElement.current.style.setProperty("--bg-y", `${background.y}%`);
-    }
+    },
   }));
 
   const containerStyle = {
@@ -103,8 +103,8 @@ export const GlareCard = forwardRef<GlareCardApi, {
       style={containerStyle}
       className="relative isolate [contain:layout_style] [perspective:600px] transition-transform duration-[var(--duration)] ease-[var(--easing)] delay-[var(--delay)] will-change-transform w-[250px] [aspect-ratio:4/3]" //adjust size
       ref={refElement}
-      // Note: We are keeping the internal listeners active. If the parent controls it, 
-      // the parent's updates will likely override these or run in parallel. 
+      // Note: We are keeping the internal listeners active. If the parent controls it,
+      // the parent's updates will likely override these or run in parallel.
       // Ideally, pass a prop 'controlled' to disable these if needed. Both active is fine for now usually.
       onPointerMove={(event) => {
         const rotateFactor = 0.4;

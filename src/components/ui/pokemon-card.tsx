@@ -49,13 +49,15 @@ export function PokemonCard({
       onPointerLeave={handlePointerLeave}
     >
       <TiltCard>
-
         <div
           className={`flex w-[315px] h-[440px] rounded-2xl border-16 border-yellow-400 ${colour ?? ""} p-4 justify-center`}
         >
           <div className="flex flex-col mt-4 gap-4">
             <div ref={glareContainerRef} className="block w-fit mx-auto">
-              <GlareCard ref={glareRef} className="flex flex-col items-center justify-center">
+              <GlareCard
+                ref={glareRef}
+                className="flex flex-col items-center justify-center"
+              >
                 <img
                   className="h-full w-full absolute inset-0 object-cover"
                   src={imageURL}
