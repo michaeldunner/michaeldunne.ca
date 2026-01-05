@@ -5,6 +5,7 @@ import { useRef } from "react";
 
 type PokemonCardProps = {
   imageURL?: string;
+  name?: string;
   title?: string;
   text?: React.ReactNode;
   colour?: string; // Tailwind class
@@ -14,6 +15,7 @@ type PokemonCardProps = {
 // make the card a button with glow on hover or something
 export function PokemonCard({
   imageURL,
+  name,
   title,
   text,
   colour,
@@ -54,10 +56,11 @@ export function PokemonCard({
     >
       <TiltCard>
         <div
-          className={`flex w-[315px] h-[440px] rounded-2xl border-16 border-yellow-400 ${colour ?? ""} p-4 justify-center`}
+          className={`relative flex w-[315px] h-[440px] rounded-2xl border-16 border-yellow-400 ${colour ?? ""} p-4 justify-center`}
           style={{ backgroundColor: backgroundColor }}
         >
-          <div className="flex flex-col mt-4 gap-4">
+          <span className="absolute top-2 left-5 font-bold text-xl text-black dark:text-black">{name}</span>
+          <div className="flex flex-col mt-6 gap-4">
             <div ref={glareContainerRef} className="block w-fit mx-auto">
               <GlareCard
                 ref={glareRef}

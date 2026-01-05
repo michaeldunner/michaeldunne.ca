@@ -28,8 +28,9 @@ export function NowPlayingCard() {
 
     const isPlaying = data?.isPlaying;
     const image = isPlaying ? data.albumImageUrl : spotify;
-    const title = isPlaying ? data.title : "Not Playing";
-    const text = isPlaying ? data.artist : "";
+    const name = isPlaying ? "Current Song" : "Spotify";
+    const title = isPlaying ? data.title : "Not Listening To Anything";
+    const text = isPlaying ? data.artist : "Click here to check out my Spotify";
     const link = "https://open.spotify.com/user/4oae5ks5mrf3u77vqj563xeun?si=5c453783fce74089";
 
 
@@ -57,6 +58,7 @@ export function NowPlayingCard() {
 
     return (
         <PokemonCard
+        name={name}
             imageURL={image}
             backgroundColor={finalBackgroundColor}
             title={title}

@@ -2,6 +2,7 @@ import { EncryptedText } from "./encrypted-text";
 import { NowPlayingCard } from "./now-playing";
 import { PokemonCard } from "./pokemon-card";
 import charizard from "../../assets/charizard.jpg";
+import { LetterboxdCard } from "../letterboxd";
 
 function Home() {
   return (
@@ -27,10 +28,14 @@ function Home() {
             <PokemonCard
               imageURL={charizard}
               colour="bg-red-500"
+              name="Name"
               title="Sample Card"
               text="This is a description"
               to="1"
             />
+          </div>
+          <div className="flex items-center justify-center min-h-[50vh] md:h-screen w-full md:w-auto">
+            <LetterboxdCard />
           </div>
           <div className="flex items-center justify-center min-h-[50vh] md:h-screen w-full md:w-auto">
             <NowPlayingCard />
