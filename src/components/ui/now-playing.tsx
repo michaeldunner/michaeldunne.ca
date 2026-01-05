@@ -6,7 +6,11 @@
 import { PokemonCard } from "./pokemon-card";
 import { SpotifyResponse } from "../../assets/types";
 import { useQuery } from "@tanstack/react-query";
-import charizard from "../../assets/charizard.jpg";
+import spotify from "../../assets/spotify.png";
+import { useEffect, useState } from "react";
+import { FastAverageColor } from "fast-average-color";
+
+const fac = new FastAverageColor();
 
 export function NowPlayingCard() {
     const { data } = useQuery<SpotifyResponse>({
@@ -23,14 +27,39 @@ export function NowPlayingCard() {
     });
 
     const isPlaying = data?.isPlaying;
-    const image = isPlaying ? data.albumImageUrl : charizard;
-    const text = isPlaying ? `${data.title} - ${data.artist}` : "Not Playing";
+    const image = isPlaying ? data.albumImageUrl : spotify;
+    const title = isPlaying ? data.title : "Not Playing";
+    const text = isPlaying ? data.artist : "";
     const link = "https://open.spotify.com/user/4oae5ks5mrf3u77vqj563xeun?si=5c453783fce74089";
+
+
+    // Default green-400 roughly (#10B981)
+    const [bgColor, setBgColor] = useState<string | undefined>(undefined);
+
+    // Determine the background color: dynamic if playing, default hex if not
+    const finalBackgroundColor = isPlaying && bgColor ? bgColor : "#1ed760";
+
+    useEffect(() => {
+        const url = data && 'albumImageUrl' in data ? data.albumImageUrl : undefined;
+        if (isPlaying && url) {
+            fac.getColorAsync(url)
+                .then((color) => {
+                    setBgColor(color.hex);
+                })
+                .catch((e) => {
+                    console.error(e);
+                    setBgColor(undefined);
+                });
+        } else {
+            setBgColor(undefined);
+        }
+    }, [isPlaying, data]);
 
     return (
         <PokemonCard
             imageURL={image}
-            colour="bg-green-500"
+            backgroundColor={finalBackgroundColor}
+            title={title}
             text={text}
             to={link}
         />

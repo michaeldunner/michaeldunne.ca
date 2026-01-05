@@ -5,15 +5,19 @@ import { useRef } from "react";
 
 type PokemonCardProps = {
   imageURL?: string;
-  text?: string;
-  colour?: string;
+  title?: string;
+  text?: React.ReactNode;
+  colour?: string; // Tailwind class
+  backgroundColor?: string; // Hex code or other CSS color value
 };
 
 // make the card a button with glow on hover or something
 export function PokemonCard({
   imageURL,
+  title,
   text,
   colour,
+  backgroundColor,
   to,
 }: PokemonCardProps & { to?: string }) {
   const glareRef = useRef<import("../ui/glare-card").GlareCardApi>(null);
@@ -51,6 +55,7 @@ export function PokemonCard({
       <TiltCard>
         <div
           className={`flex w-[315px] h-[440px] rounded-2xl border-16 border-yellow-400 ${colour ?? ""} p-4 justify-center`}
+          style={{ backgroundColor: backgroundColor }}
         >
           <div className="flex flex-col mt-4 gap-4">
             <div ref={glareContainerRef} className="block w-fit mx-auto">
@@ -64,7 +69,18 @@ export function PokemonCard({
                 />
               </GlareCard>
             </div>
-            <p className="text-black dark:text-black text-xl">{text}</p>
+            <div className="flex flex-col items-center">
+              {title && (
+                <span className="font-bold text-center text-xl text-black dark:text-black">
+                  {title}
+                </span>
+              )}
+              {text && (
+                <span className="text-sm text-center opacity-90 text-black dark:text-black">
+                  {text}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </TiltCard>

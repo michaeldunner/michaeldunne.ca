@@ -12,3 +12,4 @@ export interface SpotifyNotPlaying {
 }
 
 export type SpotifyResponse = SpotifyNowPlaying | SpotifyNotPlaying;
+

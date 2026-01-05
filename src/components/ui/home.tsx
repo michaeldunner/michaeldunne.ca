@@ -27,12 +27,13 @@ function Home() {
             <PokemonCard
               imageURL={charizard}
               colour="bg-red-500"
-              text="This is a sample card"
+              title="Sample Card"
+              text="This is a description"
               to="1"
             />
           </div>
           <div className="flex items-center justify-center min-h-[50vh] md:h-screen w-full md:w-auto">
-            <NowPlayingCard/>
+            <NowPlayingCard />
           </div>
         </div>
       </div>
