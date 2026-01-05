@@ -3,6 +3,7 @@ import { NowPlayingCard } from "./now-playing";
 import { PokemonCard } from "./pokemon-card";
 import charizard from "../../assets/charizard.jpg";
 import { LetterboxdCard } from "../letterboxd";
+import { motion } from "motion/react";
 
 function Home() {
   return (
@@ -22,8 +23,27 @@ function Home() {
         </div>
 
         {/* Cards container: centered vertically and horizontally */}
-        <div className="flex flex-col md:flex-row gap-10 items-center justify-center w-full z-10">
-          <div className="flex items-center justify-center">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: { opacity: 0 },
+            visible: {
+              opacity: 1,
+              transition: {
+                staggerChildren: 0.15
+              }
+            }
+          }}
+          className="flex flex-col md:flex-row gap-10 items-center justify-center w-full z-10"
+        >
+          <motion.div
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+            }}
+            className="flex items-center justify-center"
+          >
             <PokemonCard
               imageURL={charizard}
               colour="bg-red-500"
@@ -32,14 +52,26 @@ function Home() {
               text="This is a description"
               to="1"
             />
-          </div>
-          <div className="flex items-center justify-center">
+          </motion.div>
+          <motion.div
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+            }}
+            className="flex items-center justify-center"
+          >
             <LetterboxdCard />
-          </div>
-          <div className="flex items-center justify-center">
+          </motion.div>
+          <motion.div
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+            }}
+            className="flex items-center justify-center"
+          >
             <NowPlayingCard />
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
     </div>
   );
