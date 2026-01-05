@@ -1,4 +1,5 @@
 import { EncryptedText } from "./encrypted-text";
+import { NowPlayingCard } from "./now-playing";
 import { PokemonCard } from "./pokemon-card";
 import charizard from "../../assets/charizard.jpg";
 
@@ -22,7 +23,6 @@ function Home() {
         {/* everying below will be a row of cards, maybe do some funky stuff for spacing and spacing when sidebar is open */}
         <div className="flex flex-col md:flex-row gap-10 h-full md:h-auto pb-20 md:pb-0 mt-20 md:mt-0">
           {/* 1 and 2 are placeholders */}
-
           <div className="flex items-center justify-center min-h-[50vh] md:h-screen w-full md:w-auto">
             <PokemonCard
               imageURL={charizard}
@@ -32,12 +32,7 @@ function Home() {
             />
           </div>
           <div className="flex items-center justify-center min-h-[50vh] md:h-screen w-full md:w-auto">
-            <PokemonCard
-              imageURL={charizard}
-              colour="bg-green-500"
-              text="This is a sample card"
-              to="2"
-            />
+            <NowPlayingCard/>
           </div>
         </div>
       </div>
