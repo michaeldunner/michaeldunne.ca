@@ -59,7 +59,9 @@ export function PokemonCard({
           className={`relative flex w-[315px] h-[440px] rounded-2xl border-16 border-yellow-400 ${colour ?? ""} p-4 justify-center`}
           style={{ backgroundColor: backgroundColor }}
         >
-          <span className="absolute top-2 left-5 font-bold text-xl text-black dark:text-black">{name}</span>
+          <span className="absolute top-2 left-5 font-bold text-xl text-black dark:text-black">
+            {name}
+          </span>
           <div className="flex flex-col mt-6 gap-4">
             <div ref={glareContainerRef} className="block w-fit mx-auto">
               <GlareCard
