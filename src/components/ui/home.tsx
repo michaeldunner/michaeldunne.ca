@@ -8,8 +8,8 @@ import { motion } from "motion/react";
 function Home() {
   return (
     <div className="flex flex-1">
-      <div className="relative flex h-screen w-full flex-col items-center justify-center rounded-tl-2xl border border-neutral-200 bg-white p-2 md:p-10 dark:border-neutral-700 dark:bg-neutral-900">
-        <div className="absolute top-10 z-20 flex justify-center">
+      <div className="relative flex h-screen w-full flex-col items-center justify-start overflow-y-auto rounded-tl-2xl border border-neutral-200 bg-white p-2 md:justify-center md:overflow-hidden md:p-10 dark:border-neutral-700 dark:bg-neutral-900">
+        <div className="relative z-20 mt-10 mb-8 flex shrink-0 justify-center md:absolute md:top-10 md:my-0">
           <EncryptedText
             text="Michael Dunne"
             encryptedClassName="text-yellow-500"
@@ -35,7 +35,7 @@ function Home() {
               }
             }
           }}
-          className="flex flex-col md:flex-row gap-10 items-center justify-center w-full z-10"
+          className="flex z-10 w-full flex-col items-center justify-center gap-10 pb-10 md:flex-row md:pb-0"
         >
           <motion.div
             variants={{
