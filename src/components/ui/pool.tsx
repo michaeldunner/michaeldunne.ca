@@ -39,8 +39,8 @@ function Pool() {
   };
 
   return (
-    <div className="h-full w-full bg-neutral-900 p-4 md:p-8 overflow-y-auto">
-      <div className="max-w-6xl mx-auto bg-white dark:bg-neutral-900 rounded-[30px] overflow-hidden flex flex-col md:flex-row min-h-[80vh] border-8 border-red-700 relative">
+    <div className="h-full w-full bg-white dark:bg-neutral-950 p-4 md:p-8 overflow-y-auto">
+      <div className="max-w-6xl mx-auto bg-neutral-50 dark:bg-neutral-900 rounded-[30px] overflow-hidden flex flex-col md:flex-row min-h-[80vh] border-8 border-red-700 relative">
         {/* Top Decoration (Mobile) / Left Decoration */}
         <div className="absolute top-0 left-0 w-full md:w-[60px] md:h-full bg-red-700 flex md:flex-col items-center justify-center gap-4 p-2 z-20">
           <div className="w-8 h-8 rounded-full bg-blue-400 border-2 border-white shadow-[0_0_10px_#60a5fa] animate-pulse"></div>
@@ -109,7 +109,7 @@ function Pool() {
             </div>
           </div>
 
-          <div className="bg-neutral-800 text-green-400 font-mono p-4 rounded-lg text-sm">
+          <div className="bg-neutral-200 dark:bg-neutral-700 text-green-700 dark:text-green-400 font-mono p-4 rounded-lg text-sm">
             &gt; READING_TIME: 5 MINS
             <br />
             &gt; TYPE: WATER / FLYING
