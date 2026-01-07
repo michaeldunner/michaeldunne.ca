@@ -2,8 +2,6 @@ import { EncryptedText } from "./encrypted-text";
 import { NowPlayingCard } from "./now-playing";
 import { PokemonCard } from "./pokemon-card";
 import charizard from "../../assets/charizard.jpg";
-import charizardPixelArt from "../../assets/charizard_pixel_art.png";
-import gyarados from "../../assets/gyarados_pixel_art.png";
 import { LetterboxdCard } from "../letterboxd";
 import { motion } from "motion/react";
 
