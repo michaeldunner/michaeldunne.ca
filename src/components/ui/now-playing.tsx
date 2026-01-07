@@ -16,7 +16,7 @@ export function NowPlayingCard() {
     queryKey: ["spotify-now-playing"],
     queryFn: async () => {
       const response = await fetch(
-        "https://spotify-now-playing.mdunne697.workers.dev/.mathewdunne.ca/",
+        "https://spotify-now-playing.mdunne697.workers.dev/",
       );
       if (!response.ok) throw new Error("Failed to fetch");
       return response.json();
