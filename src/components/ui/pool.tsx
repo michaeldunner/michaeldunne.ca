@@ -1,5 +1,5 @@
 "use client";
-import { Pokedex } from "./pokedex";
+import { Article } from "./article";
 import gyarados from "../../assets/gyarados_pixel_art.png";
 import charizard from "../../assets/charizard_pixel_art.png";
 import blastoise from "../../assets/blastoise_pixel_art.png";
@@ -14,7 +14,7 @@ const POKEMON_IMAGES = [
 
 export default function Pool() {
     return (
-        <Pokedex
+        <Article
             images={POKEMON_IMAGES}
             title="#130 The Atrocious"
             subtitle="Gyarados"

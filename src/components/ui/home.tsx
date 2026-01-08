@@ -2,7 +2,7 @@ import { EncryptedText } from "./encrypted-text";
 import { NowPlayingCard } from "./now-playing";
 import { PokemonCard } from "./pokemon-card";
 import charizard from "../../assets/charizard.jpg";
-import { LetterboxdCard } from "../letterboxd";
+import { LetterboxdCard } from "./letterboxd";
 import { motion } from "motion/react";
 
 function Home() {

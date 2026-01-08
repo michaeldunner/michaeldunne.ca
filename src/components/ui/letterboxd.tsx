@@ -1,9 +1,9 @@
-import { PokemonCard } from "./ui/pokemon-card";
-import { LetterboxdResponse } from "../assets/types";
+import { PokemonCard } from "./pokemon-card";
+import { LetterboxdResponse } from "../../assets/types";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { FastAverageColor } from "fast-average-color";
-import charizard from "../assets/charizard.jpg";
+import charizard from "../../assets/charizard.jpg";
 
 const fac = new FastAverageColor();
 
