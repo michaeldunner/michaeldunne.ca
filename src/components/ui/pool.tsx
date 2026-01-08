@@ -13,6 +13,49 @@ const POKEMON_IMAGES = [
   { src: venusaur, name: "Venusaur" },
 ];
 
+const RAINBOW_COLORS = [
+  'rgb(239, 68, 68)',   // Red
+  'rgb(249, 115, 22)',  // Orange
+  'rgb(234, 179, 8)',   // Yellow
+  'rgb(34, 197, 94)',   // Green
+  'rgb(59, 130, 246)',  // Blue
+  'rgb(99, 102, 241)',  // Indigo
+  'rgb(168, 85, 247)',  // Purple
+];
+
+function DJButton() {
+  const [isPressed, setIsPressed] = useState(false);
+  const [currentColor, setCurrentColor] = useState(RAINBOW_COLORS[0]);
+
+  const handlePress = () => {
+    const randomColor = RAINBOW_COLORS[Math.floor(Math.random() * RAINBOW_COLORS.length)];
+    setCurrentColor(randomColor);
+    setIsPressed(true);
+  };
+
+  return (
+    <motion.button
+      onMouseDown={handlePress}
+      onMouseUp={() => setIsPressed(false)}
+      onMouseLeave={() => setIsPressed(false)}
+      onBlur={() => setIsPressed(false)}
+      whileHover={{ scale: 1.05, borderColor: 'rgba(255,255,255,0.2)' }}
+      animate={{
+        backgroundColor: isPressed ? currentColor : 'rgb(38, 38, 38)',
+        boxShadow: isPressed
+          ? `0 0 25px ${currentColor}, inset 0 0 10px rgba(255,255,255,0.4)`
+          : '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)',
+        scale: isPressed ? 0.92 : 1,
+      }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      className="w-12 h-12 rounded-lg border-2 border-neutral-700/50 flex items-center justify-center relative overflow-hidden group cursor-pointer"
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
+
+    </motion.button>
+  );
+}
+
 function Pool() {
   const [currentIdx, setCurrentIdx] = useState(0);
 
@@ -40,17 +83,24 @@ function Pool() {
 
   return (
     <div className="h-full w-full bg-white dark:bg-neutral-950 p-4 md:p-8 overflow-y-auto">
-      <div className="max-w-6xl mx-auto bg-neutral-50 dark:bg-neutral-900 rounded-[30px] overflow-hidden flex flex-col md:flex-row min-h-[80vh] border-8 border-red-700 relative">
-        {/* Top Decoration (Mobile) / Left Decoration */}
-        <div className="absolute top-0 left-0 w-full md:w-[60px] md:h-full bg-red-700 flex md:flex-col items-center justify-center gap-4 p-2 z-20">
+      <div
+        className="max-w-6xl mx-auto bg-neutral-50 dark:bg-neutral-900 rounded-3xl overflow-hidden flex flex-col md:flex-row min-h-[80vh] border-8 border-red-700 relative"
+        style={{ clipPath: "polygon(0 0, 46% 0, 46.5% 0.1px, 47% 0.4px, 47.5% 1px, 48% 2px, 48.5% 4px, 49% 7px, 49.5% 12px, 49.8% 18px, 50% 28px, 50.2% 38px, 50.5% 44px, 51% 50px, 51.5% 53px, 52% 54.5px, 53% 55.5px, 55% 56px, 100% 56px, 100% 100%, 0 100%)" }}
+      >
+        {/* Top Decoration */}
+        <div className="absolute top-0 left-0 w-full h-14 bg-red-700 flex items-center justify-start gap-4 px-6 z-20">
           <div className="w-8 h-8 rounded-full bg-blue-400 border-2 border-white shadow-[0_0_10px_#60a5fa] animate-pulse"></div>
-          <div className="w-3 h-3 rounded-full bg-red-900"></div>
-          <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-          <div className="w-3 h-3 rounded-full bg-green-400"></div>
+          <div className="flex gap-2">
+            <div className="w-3 h-3 rounded-full bg-red-900 border border-red-950"></div>
+            <div className="w-3 h-3 rounded-full bg-yellow-400 border border-yellow-600"></div>
+            <div className="w-3 h-3 rounded-full bg-green-400 border border-green-600"></div>
+          </div>
+          {/* text up in bezel could here */}
+          {/* <span className="hidden md:block text-white/40 font-mono text-xs ml-4 uppercase tracking-widest">File Explorer // Pool</span> */}
         </div>
 
         {/* Left Col: Visuals (Sticky on Desktop) */}
-        <div className="md:w-1/2 p-8 md:pl-24 bg-neutral-100 dark:bg-neutral-800 flex flex-col gap-6 border-b md:border-b-0 md:border-r border-neutral-300 dark:border-neutral-700">
+        <div className="md:w-1/2 p-8 pt-24 bg-neutral-100 dark:bg-neutral-800 flex flex-col gap-6 border-b md:border-b-0 md:border-r border-neutral-300 dark:border-neutral-700">
           <div
             className="aspect-square bg-white dark:bg-black rounded-xl border-4 border-neutral-300 dark:border-neutral-600 flex items-center justify-center relative overflow-hidden cursor-pointer group"
             onClick={handleImageClick}
@@ -90,22 +140,50 @@ function Pool() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-blue-100 dark:bg-blue-900/30 p-4 rounded-lg">
-              <span className="text-xs font-bold text-blue-500 uppercase">
-                Height
-              </span>
-              <p className="text-2xl font-mono text-neutral-800 dark:text-neutral-200">
-                6.5m
-              </p>
+          {/* Controls: D-Pad and DJ Board */}
+          <div className="flex items-center justify-between gap-8 mb-4">
+            {/* D-Pad */}
+            <div className="relative w-32 h-32 flex items-center justify-center translate-x-4">
+              <svg width="100" height="100" viewBox="0 0 100 100" className="drop-shadow-lg overflow-visible">
+                <defs>
+                  <linearGradient id="padGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="rgba(255, 255, 255, 0.15)" />
+                    <stop offset="50%" stopColor="transparent" />
+                  </linearGradient>
+                </defs>
+                {/* Rounded Cross Shape with Border */}
+                <path
+                  d="M 35,5 A 5,5 0 0 1 40,0 H 60 A 5,5 0 0 1 65,5 V 35 H 95 A 5,5 0 0 1 100,40 V 60 A 5,5 0 0 1 95,65 H 65 V 95 A 5,5 0 0 1 60,100 H 40 A 5,5 0 0 1 35,95 V 65 H 5 A 5,5 0 0 1 0,60 V 40 A 5,5 0 0 1 5,35 H 35 Z"
+                  fill="rgb(38, 38, 38)"
+                  stroke="rgba(163, 163, 163, 0.3)"
+                  strokeWidth="1"
+                />
+                {/* Gradient Overlay */}
+                <path
+                  d="M 35,5 A 5,5 0 0 1 40,0 H 60 A 5,5 0 0 1 65,5 V 35 H 95 A 5,5 0 0 1 100,40 V 60 A 5,5 0 0 1 95,65 H 65 V 95 A 5,5 0 0 1 60,100 H 40 A 5,5 0 0 1 35,95 V 65 H 5 A 5,5 0 0 1 0,60 V 40 A 5,5 0 0 1 5,35 H 35 Z"
+                  fill="url(#padGradient)"
+                  pointerEvents="none"
+                />
+              </svg>
+
+              {/* Logical Buttons (Invisible but interactive) */}
+              <button
+                onClick={() => setCurrentIdx((prev) => (prev - 1 + POKEMON_IMAGES.length) % POKEMON_IMAGES.length)}
+                className="absolute left-1 w-10 h-10 z-10 cursor-pointer"
+                aria-label="Previous"
+              />
+              <button
+                onClick={() => setCurrentIdx((prev) => (prev + 1) % POKEMON_IMAGES.length)}
+                className="absolute right-1 w-10 h-10 z-10 cursor-pointer"
+                aria-label="Next"
+              />
             </div>
-            <div className="bg-blue-100 dark:bg-blue-900/30 p-4 rounded-lg">
-              <span className="text-xs font-bold text-blue-500 uppercase">
-                Weight
-              </span>
-              <p className="text-2xl font-mono text-neutral-800 dark:text-neutral-200">
-                235kg
-              </p>
+
+            {/* DJ Button Board */}
+            <div className="grid grid-cols-3 gap-3 pr-4">
+              {[...Array(6)].map((_, i) => (
+                <DJButton key={i} />
+              ))}
             </div>
           </div>
 
@@ -119,7 +197,7 @@ function Pool() {
         </div>
 
         {/* Right Col: Content */}
-        <div className="md:w-1/2 p-8 md:p-12 overflow-y-auto">
+        <div className="md:w-1/2 p-8 pt-24 md:p-12 md:pt-24 overflow-y-auto">
           <motion.div
             initial={{ x: 20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
