@@ -16,8 +16,6 @@ interface ArticleProps {
   videoUrl?: string;
 }
 
-
-// CHNAGE TO ARTICLE
 export function Article({
   images,
   title,
@@ -25,7 +23,7 @@ export function Article({
   date,
   description,
   statusLines,
-  videoUrl
+  videoUrl,
 }: ArticleProps) {
   const [currentIdx, setCurrentIdx] = useState(0);
 
@@ -60,9 +58,7 @@ export function Article({
 
   return (
     <div className="h-full w-full bg-white dark:bg-neutral-950 p-4 md:p-8 overflow-y-auto">
-      
       <Pokedex>
-
         {/* Left Col: Visuals (Sticky on Desktop) */}
         <div className="md:w-1/2 p-8 pt-24 bg-neutral-100 dark:bg-neutral-800 flex flex-col gap-6 border-b md:border-b-0 md:border-r border-neutral-300 dark:border-neutral-700">
           <ImageSlideshow
@@ -132,9 +128,7 @@ export function Article({
             )}
           </motion.div>
         </div>
-</Pokedex>
-      </div>
+      </Pokedex>
+    </div>
   );
 }
-
-

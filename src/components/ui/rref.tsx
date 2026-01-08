@@ -1,5 +1,5 @@
 "use client";
-import { Article } from "./article";
+import { Code } from "./code";
 import gyarados from "../../assets/gyarados_pixel_art.png";
 import charizard from "../../assets/charizard_pixel_art.png";
 import blastoise from "../../assets/blastoise_pixel_art.png";
@@ -14,16 +14,31 @@ const POKEMON_IMAGES = [
 
 export default function Pool() {
   return (
-    <Article
-      images={POKEMON_IMAGES}
+    <Code
       title="#130 The Atrocious"
       subtitle="Gyarados"
       date="2026-01-06"
-      statusLines={[
-        "READING_TIME: 5 MINS",
-        "TYPE: WATER / FLYING",
-        "STATUS: ONLINE",
-      ]}
+      code={`const DummyComponent = () => {
+  const [count, setCount] = React.useState(0);
+ 
+  const handleClick = () => {
+    setCount(prev => prev + 1);
+  };
+ 
+  return (
+    <div className="p-4 border rounded-lg">
+      <h2 className="text-xl font-bold mb-4">Fights Counter</h2>
+      <p className="mb-2">Fight Club Fights Count: {count}</p>
+      <button 
+        onClick={handleClick}
+        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+      >
+        Increment
+      </button>
+    </div>
+  );
+};
+`}
       description={
         <>
           <p>
@@ -45,7 +60,6 @@ export default function Pool() {
           </p>
         </>
       }
-      videoUrl="https://www.youtube.com/embed/dQw4w9WgXcQ"
     />
   );
 }
