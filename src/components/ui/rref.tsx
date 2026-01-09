@@ -1,18 +1,7 @@
 "use client";
 import { Code } from "./code";
-import gyarados from "../../assets/gyarados_pixel_art.png";
-import charizard from "../../assets/charizard_pixel_art.png";
-import blastoise from "../../assets/blastoise_pixel_art.png";
-import venusaur from "../../assets/venusaur_pixel_art.png";
 
-const POKEMON_IMAGES = [
-  { src: gyarados, name: "Gyarados" },
-  { src: charizard, name: "Charizard" },
-  { src: blastoise, name: "Blastoise" },
-  { src: venusaur, name: "Venusaur" },
-];
-
-export default function Pool() {
+export function RREF() {
   return (
     <Code
       title="#130 The Atrocious"

@@ -78,6 +78,22 @@ function Home() {
               to="/pool"
               />
           </motion.div> */}
+          {/* <motion.div
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+            }}
+            className="flex items-center justify-center"
+            >
+            <PokemonCard
+              imageURL={gyarados}
+              colour="bg-blue-500"
+              name="Gyarados"
+              title="The Pool"
+              text="Dive into my thoughts."
+              to="/rref"
+              />
+          </motion.div> */}
           <motion.div
             variants={{
               hidden: { opacity: 0, y: 20 },

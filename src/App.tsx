@@ -4,7 +4,8 @@ import { MySidebar } from "./components/ui/my-sidebar";
 import { Route, Routes } from "react-router-dom";
 import Home from "./components/ui/home";
 import Pool from "./components/ui/pool";
-import Rref from "./components/ui/rref";
+import { RREF } from "./components/ui/rref";
+import { PDF } from "./components/ui/pdf";
 
 function App() {
   return (
@@ -13,7 +14,8 @@ function App() {
         <Route path="/" element={<MySidebar />}>
           <Route index element={<Home />} />
           <Route path="pool" element={<Pool />} />
-          <Route path="rref" element={<Rref />} />
+          <Route path="rref" element={<RREF />} />
+          <Route path="pdf" element={<PDF />} />
         </Route>
       </Routes>
     </ThemeProvider>
