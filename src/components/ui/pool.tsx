@@ -20,7 +20,7 @@ export default function Pool() {
       subtitle="Gyarados"
       date="2026-01-06"
       statusLines={[
-        "READING_TIME: 5 MINS",
+        "REALEASED ON 01/06/2026",
         "TYPE: WATER / FLYING",
         "STATUS: ONLINE",
       ]}

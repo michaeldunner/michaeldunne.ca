@@ -100,7 +100,7 @@ export function Article({
               {subtitle}
             </h2>
             <span className="inline-block bg-neutral-200 dark:bg-neutral-700 px-2 py-1 rounded text-xs font-bold tracking-widest text-neutral-500 uppercase mb-8">
-              Data Entry: {date}
+              CHANGE THIS TO SOMETHINGData Entry: {date}
             </span>
 
             <div className="prose prose-neutral dark:prose-invert">
