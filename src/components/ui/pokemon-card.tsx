@@ -3,6 +3,7 @@ import { GlareCard } from "../ui/glare-card";
 import { TiltCard } from "./tilt-card";
 import { Skeleton } from "./skeleton";
 import { useRef, useState, useEffect } from "react";
+import { motion } from "motion/react";
 
 type PokemonCardProps = {
   imageURL?: string;
@@ -121,7 +122,19 @@ export function PokemonCard({
       onPointerLeave={handlePointerLeave}
     >
       <TiltCard>
-        <div
+        <motion.div
+          animate={{
+            boxShadow: [
+              "0 0 0px rgba(234, 179, 8, 0)",
+              "0 0 25px rgba(234, 179, 8, 0.4)",
+              "0 0 0px rgba(234, 179, 8, 0)",
+            ],
+          }}
+          transition={{
+            repeat: Infinity,
+            duration: 3,
+            ease: "easeInOut",
+          }}
           className={`relative flex w-[315px] h-[440px] rounded-2xl border-16 border-yellow-400 ${colour ?? ""} p-4 justify-center`}
           style={{ backgroundColor: backgroundColor }}
         >
@@ -180,7 +193,7 @@ export function PokemonCard({
               )}
             </div>
           </div>
-        </div>
+        </motion.div>
       </TiltCard>
     </Link>
   );

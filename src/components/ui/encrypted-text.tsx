@@ -23,6 +23,8 @@ type EncryptedTextProps = {
   /** CSS class for styling the revealed characters */
   revealedClassName?: string;
   style?: React.CSSProperties;
+  /** Whether to show a cycling shimmer effect across the text */
+  shimmer?: boolean;
 };
 
 const DEFAULT_CHARSET =
@@ -55,6 +57,7 @@ export const EncryptedText: React.FC<EncryptedTextProps> = ({
   encryptedClassName,
   revealedClassName,
   style,
+  shimmer = false,
 }) => {
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true });
@@ -129,31 +132,71 @@ export const EncryptedText: React.FC<EncryptedTextProps> = ({
   if (!text) return null;
 
   return (
-    <motion.span
-      ref={ref}
-      className={cn(className)}
-      aria-label={text}
-      role="text"
-    >
-      {text.split("").map((char, index) => {
-        const isRevealed = index < revealCount;
-        const displayChar = isRevealed
-          ? char
-          : char === " "
-            ? " "
-            : (scrambleCharsRef.current[index] ??
-              generateRandomCharacter(charset));
+    <div className="relative inline-block">
+      <motion.span
+        ref={ref}
+        className={cn(className)}
+        aria-label={text}
+        role="text"
+      >
+        {text.split("").map((char, index) => {
+          const isRevealed = index < revealCount;
+          const displayChar = isRevealed
+            ? char
+            : char === " "
+              ? " "
+              : (scrambleCharsRef.current[index] ??
+                generateRandomCharacter(charset));
 
-        return (
-          <span
-            key={index}
-            className={cn(isRevealed ? revealedClassName : encryptedClassName)}
-            style={style}
-          >
-            {displayChar}
-          </span>
-        );
-      })}
-    </motion.span>
+          return (
+            <span
+              key={index}
+              className={cn(isRevealed ? revealedClassName : encryptedClassName)}
+              style={style}
+            >
+              {displayChar}
+            </span>
+          );
+        })}
+      </motion.span>
+      {shimmer && (
+        <motion.span
+          className={cn(className, "absolute inset-0 pointer-events-none select-none")}
+          aria-hidden="true"
+          style={{
+            ...style,
+            background: "linear-gradient(to right, transparent 0%, rgba(255, 217, 0, 0.8) 50%, transparent 100%)",
+            backgroundSize: "200% 100%",
+            WebkitBackgroundClip: "text",
+            backgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            WebkitTextStrokeColor: "transparent", // Hide stroke on shimmer layer to keep it clean
+          }}
+          animate={{
+            backgroundPosition: ["100% 0", "-100% 0"],
+          }}
+          transition={{
+            repeat: Infinity,
+            duration: 5,
+            ease: "linear",
+          }}
+        >
+          {text.split("").map((char, index) => {
+            const isRevealed = index < revealCount;
+            const displayChar = isRevealed
+              ? char
+              : char === " "
+                ? " "
+                : (scrambleCharsRef.current[index] ??
+                  generateRandomCharacter(charset));
+            return (
+              <span key={index} style={style}>
+                {displayChar}
+              </span>
+            );
+          })}
+        </motion.span>
+      )}
+    </div>
   );
 };

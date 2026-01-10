@@ -2,6 +2,7 @@ import { EncryptedText } from "./encrypted-text";
 import { NowPlayingCard } from "./now-playing";
 import { PokemonCard } from "./pokemon-card";
 import charizard from "../../assets/charizard.jpg";
+import pdf from "../../assets/pdf.png";
 import { LetterboxdCard } from "./letterboxd";
 import { motion } from "motion/react";
 
@@ -14,6 +15,7 @@ function Home() {
             text="Michael Dunne"
             encryptedClassName="text-yellow-500"
             revealedClassName="text-yellow-500"
+            shimmer={true}
             style={{
               fontFamily: "Pokemon",
               fontSize: "48px",
@@ -94,6 +96,22 @@ function Home() {
               to="/rref"
               />
           </motion.div> */}
+          <motion.div
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+            }}
+            className="flex items-center justify-center"
+          >
+            <PokemonCard
+              imageURL={pdf}
+              colour="bg-blue-400"
+              name="PDF Merger"
+              title="Merge PDFs"
+              text="I made this because I needed a service like this for school"
+              to="/pdf"
+            />
+          </motion.div>
           <motion.div
             variants={{
               hidden: { opacity: 0, y: 20 },
