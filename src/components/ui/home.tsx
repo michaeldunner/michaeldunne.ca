@@ -8,8 +8,8 @@ import { motion } from "motion/react";
 
 function Home() {
   return (
-    <div className="flex flex-1">
-      <div className="relative flex h-screen w-full flex-col items-center justify-start overflow-y-auto rounded-tl-2xl border border-neutral-200 bg-white p-2 md:justify-center md:overflow-y-auto md:p-10 dark:border-neutral-700 dark:bg-neutral-900">
+    <div className="flex flex-1 min-h-screen">
+      <div className="relative flex min-h-screen w-full flex-col items-center justify-start overflow-y-auto rounded-tl-2xl border border-neutral-200 bg-white p-2 md:justify-center dark:border-neutral-700 dark:bg-neutral-900">
         <div className="relative z-20 mt-10 mb-8 flex shrink-0 justify-center md:absolute md:top-10 md:my-0">
           <EncryptedText
             text="Michael Dunne"
@@ -133,6 +133,8 @@ function Home() {
             />
           </motion.div>
         </motion.div>
+        {/* Mobile Spacer */}
+        <div className="h-24 w-full shrink-0 md:hidden" />
       </div>
     </div>
   );

@@ -57,7 +57,7 @@ export function PDF() {
     };
 
     return (
-        <div className="h-full w-full bg-white dark:bg-neutral-950 p-4 md:p-8 overflow-y-auto">
+        <div className="min-h-screen w-full bg-white dark:bg-neutral-950 p-4 md:p-8 overflow-y-auto">
             <Pokedex>
                 {/* Left Col: Controls & File List */}
                 <div className="md:w-1/2 p-8 pt-24 bg-neutral-100 dark:bg-neutral-800 flex flex-col gap-6 border-b md:border-b-0 md:border-r border-neutral-300 dark:border-neutral-700 overflow-hidden">
@@ -167,7 +167,7 @@ export function PDF() {
                         </h1>
                         <h2 className="text-lg font-semibold text-neutral-600 dark:text-neutral-400 mb-1">
                             Drag and drop PDF files on the left to organize your document
-                                sequence. 
+                            sequence.
                         </h2>
                         <span className="inline-block bg-neutral-200 dark:bg-neutral-700 px-2 py-1 rounded text-xs font-bold tracking-widest text-neutral-500 uppercase mb-8">
                             Version 1.0.0
@@ -268,6 +268,8 @@ export function PDF() {
                     </motion.div>
                 </div>
             </Pokedex>
+            {/* Mobile Spacer */}
+            <div className="h-32 w-full shrink-0 md:hidden" />
         </div>
     );
 }

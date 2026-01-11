@@ -74,7 +74,7 @@ export function Article({
             {/* DJ Button Board */}
             <div className="grid grid-cols-3 gap-3 pr-4">
               {[...Array(6)].map((_, i) => (
-                <DJButton key={i} note={i}/>
+                <DJButton key={i} note={i} />
               ))}
             </div>
           </div>
@@ -129,6 +129,8 @@ export function Article({
           </motion.div>
         </div>
       </Pokedex>
+      {/* Mobile Spacer */}
+      <div className="h-32 w-full shrink-0 md:hidden" />
     </div>
   );
 }

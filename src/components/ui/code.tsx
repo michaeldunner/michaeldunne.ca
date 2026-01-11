@@ -58,6 +58,8 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
           </motion.div>
         </div>
       </Pokedex>
+      {/* Mobile Spacer */}
+      <div className="h-32 w-full shrink-0 md:hidden" />
     </div>
   );
 }
