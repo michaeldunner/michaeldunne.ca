@@ -74,7 +74,7 @@ export function Article({
             {/* DJ Button Board */}
             <div className="grid grid-cols-3 gap-3 pr-4">
               {[...Array(6)].map((_, i) => (
-                <DJButton key={i} />
+                <DJButton key={i} note={i}/>
               ))}
             </div>
           </div>
