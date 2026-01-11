@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import * as Tone from "tone";
 
 const RAINBOW_COLORS = [
@@ -28,22 +28,30 @@ interface DJButtonProps {
 export function DJButton({ note }: DJButtonProps) {
   const [isPressed, setIsPressed] = useState(false);
   const [currentColor, setCurrentColor] = useState(RAINBOW_COLORS[0]);
-  const synth = new Tone.Synth().toDestination();
+
+  // Use useMemo to avoid creating a new synth on every render
+  const synth = useMemo(() => (typeof window !== "undefined" ? new Tone.Synth().toDestination() : null), []);
 
   const handlePress = () => {
+    // Resume audio context if it's suspended
+    if (Tone.getContext().state !== "running") {
+      Tone.start();
+    }
     const randomColor =
       RAINBOW_COLORS[Math.floor(Math.random() * RAINBOW_COLORS.length)];
     setCurrentColor(randomColor);
-    synth.triggerAttackRelease(MUSIC_NOTES[note], "8n");
+    synth?.triggerAttackRelease(MUSIC_NOTES[note], "8n");
     setIsPressed(true);
   };
 
   return (
     <motion.button
-      onMouseDown={handlePress}
-      onMouseUp={() => setIsPressed(false)}
-      onMouseLeave={() => setIsPressed(false)}
+      onPointerDown={handlePress}
+      onPointerUp={() => setIsPressed(false)}
+      onPointerLeave={() => setIsPressed(false)}
+      onPointerCancel={() => setIsPressed(false)}
       onBlur={() => setIsPressed(false)}
+      style={{ WebkitTapHighlightColor: "transparent" }}
       whileHover={{ scale: 1.05, borderColor: "rgba(255,255,255,0.2)" }}
       animate={{
         backgroundColor: isPressed ? currentColor : "rgb(38, 38, 38)",
@@ -53,7 +61,7 @@ export function DJButton({ note }: DJButtonProps) {
         scale: isPressed ? 0.92 : 1,
       }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
-      className="w-12 h-12 rounded-lg border-2 border-neutral-700/50 flex items-center justify-center relative overflow-hidden group cursor-pointer"
+      className="w-12 h-12 rounded-lg border-2 border-neutral-700/50 flex items-center justify-center relative overflow-hidden group cursor-pointer touch-none select-none"
     >
       <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
     </motion.button>
