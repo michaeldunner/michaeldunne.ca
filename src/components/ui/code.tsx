@@ -15,7 +15,9 @@ interface CodeProps {
 
 export function Code({ title, subtitle, date, description, code }: CodeProps) {
   const [Module, setModule] = useState<EmscriptenModule | null>(null);
-  const [result, setResult] = useState<string>('Initializing Wasm module...');
+  const [rows, setRows] = useState(3);
+  const [cols, setCols] = useState(4);
+  const [matrix, setMatrix] = useState<number[]>(new Array(12).fill(0));
 
   useEffect(() => {
     console.log("useEffect started for Wasm initialization (Script Tag Mode)");
@@ -25,7 +27,6 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
     const handleModuleReady = (mod: any) => {
       console.log("handleModuleReady triggered!");
       setModule(mod);
-      setResult('Wasm module ready.');
     };
 
     // Define Module globally BEFORE script loads
@@ -66,7 +67,6 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
       };
       script.onerror = (e) => {
         console.error("Failed to load /rref.js script:", e);
-        setResult('Error: Failed to load script.');
       };
       document.body.appendChild(script);
     } else {
@@ -78,50 +78,113 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
     };
   }, []);
 
-  useEffect(() => {
-    if (Module) {
-      runCalculation();
-    }
-  }, [Module]);
+  const handleDimensionChange = (newRows: number, newCols: number) => {
+    const r = Math.max(1, Math.min(10, newRows));
+    const c = Math.max(1, Math.min(10, newCols));
+    setRows(r);
+    setCols(c);
+    setMatrix(new Array(r * c).fill(0));
+  };
 
-  const runCalculation = () => {
-    console.log("runCalculation called, Module exists:", !!Module);
+  const updateMatrixValue = (index: number, val: string) => {
+    const newVal = parseFloat(val) || 0;
+    const newMatrix = [...matrix];
+    newMatrix[index] = newVal;
+    setMatrix(newMatrix);
+  };
+
+  const solveRREF = () => {
     if (Module) {
       try {
-        console.log("Trying to wrap 'multiply'...");
-        // Replace 'yourFunctionName' with your actual function name
-        const myFunc = Module.cwrap('multiply', 'number', ['number', 'number']);
-        console.log("cwrap returned:", myFunc);
-        const answer = myFunc(5, 10);
-        console.log("Calculation answer:", answer);
-        setResult(`Result: ${answer}`);
+        const numElements = rows * cols;
+        const bytesPerElement = 8; // double
+        const dataPtr = Module._malloc(numElements * bytesPerElement);
+
+        // Copy data to Wasm
+        const dataHeap = new Float64Array(Module.HEAPF64.buffer, dataPtr, numElements);
+        dataHeap.set(matrix);
+
+        // Call RREF
+        Module._rref(dataPtr, rows, cols);
+
+        // Get result
+        const resultData = Array.from(new Float64Array(Module.HEAPF64.buffer, dataPtr, numElements));
+        setMatrix(resultData.map(v => Number(v.toFixed(4)))); // Round to 4 decimal places for display
+
+        // Free memory
+        Module._free(dataPtr);
       } catch (e) {
-        console.error("Calculation failed:", e);
-        setResult(`Error: ${e instanceof Error ? e.message : String(e)}`);
+        console.error("RREF failed:", e);
       }
     }
   };
+
   return (
     <div className="h-full w-full bg-white dark:bg-neutral-950 p-4 md:p-8 overflow-y-auto">
       <Pokedex>
-        <div className="md:w-1/2 p-8 pt-24 bg-neutral-100 dark:bg-neutral-800 flex flex-col gap-6 border-b md:border-b-0 md:border-r border-neutral-300 dark:border-neutral-700">
-          <div className="flex flex-col gap-4">
-            <div className="text-xl font-mono p-4 bg-white dark:bg-neutral-900 rounded border border-neutral-200 dark:border-neutral-700 shadow-sm">
-              {result}
+        <div className="flex-1 p-4 md:p-8 pt-24 md:pt-32 bg-neutral-100 dark:bg-neutral-800 flex flex-col gap-6 border-b md:border-b-0 md:border-r border-neutral-300 dark:border-neutral-700 w-full md:w-1/2">
+          <div className="flex flex-col gap-8">
+            <div className="flex gap-4 items-center">
+              <div className="flex flex-col">
+                <label className="text-[10px] uppercase font-bold text-neutral-400 dark:text-neutral-500 mb-1 tracking-wider">Rows</label>
+                <input
+                  type="number"
+                  value={rows}
+                  onChange={(e) => handleDimensionChange(parseInt(e.target.value), cols)}
+                  className="w-16 p-2 rounded-lg border border-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 font-mono focus:ring-2 focus:ring-red-500/50 outline-none transition-all shadow-sm"
+                />
+              </div>
+              <div className="flex flex-col">
+                <label className="text-[10px] uppercase font-bold text-neutral-400 dark:text-neutral-500 mb-1 tracking-wider">Cols</label>
+                <input
+                  type="number"
+                  value={cols}
+                  onChange={(e) => handleDimensionChange(rows, parseInt(e.target.value))}
+                  className="w-16 p-2 rounded-lg border border-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 font-mono focus:ring-2 focus:ring-red-500/50 outline-none transition-all shadow-sm"
+                />
+              </div>
+              <motion.button
+                onClick={solveRREF}
+                disabled={!Module}
+                whileHover={Module ? { scale: 1.02, translateY: -2 } : {}}
+                whileTap={Module ? { scale: 0.98 } : {}}
+                className="mt-5 flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-neutral-400 text-white font-bold rounded-xl shadow-lg shadow-red-500/20 relative overflow-hidden group cursor-pointer"
+              >
+                {Module && (
+                  <motion.div
+                    initial={{ x: "-100%" }}
+                    animate={{ x: "100%" }}
+                    transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none"
+                  />
+                )}
+                <span className="relative z-10">SOLVE RREF</span>
+              </motion.button>
             </div>
 
-            <button
-              onClick={runCalculation}
-              disabled={!Module}
-              className="px-6 py-2 bg-red-600 hover:bg-red-700 disabled:bg-neutral-400 text-white font-bold rounded transition-colors"
-            >
-              Run Multiply(5, 10)
-            </button>
+            <div className="w-full">
+              <div
+                className="grid gap-1 p-4 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-xl max-h-[600px] overflow-y-auto"
+                style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
+              >
+                {matrix.map((val, i) => (
+                  <input
+                    key={i}
+                    type="number"
+                    step="any"
+                    value={val === 0 ? "" : val}
+                    placeholder="0"
+                    onChange={(e) => updateMatrixValue(i, e.target.value)}
+                    className="w-full px-1 py-2 text-center rounded-lg border border-neutral-100 dark:border-neutral-800 dark:bg-neutral-950 font-mono text-sm focus:ring-2 focus:ring-red-500/30 outline-none transition-all hover:bg-neutral-50 dark:hover:bg-neutral-900 shadow-sm"
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Right Col: Content */}
-        <div className="md:w-1/2 p-8 pt-24 md:p-12 md:pt-24 overflow-y-auto">
+        <div className="flex-1 p-8 pt-24 md:p-12 md:pt-32 w-full md:w-1/2">
           <motion.div
             initial={{ x: 20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
