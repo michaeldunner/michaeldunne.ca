@@ -158,104 +158,115 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
   return (
     <div className="h-full w-full bg-white dark:bg-neutral-950 p-4 md:p-8 overflow-y-auto">
       <Pokedex>
-        <div className="flex-1 p-4 md:p-8 pt-24 md:pt-32 bg-neutral-100 dark:bg-neutral-800 flex flex-col gap-6 border-b md:border-b-0 md:border-r border-neutral-300 dark:border-neutral-700 w-full md:w-1/2">
-          <div className="flex flex-col gap-8">
-            <div className="flex gap-4 items-center">
-              <div className="flex flex-col">
-                <label className="text-[10px] uppercase font-bold text-neutral-400 dark:text-neutral-500 mb-1 tracking-wider">Rows</label>
-                <input
-                  type="number"
-                  value={rows}
-                  onChange={(e) => handleDimensionChange(parseInt(e.target.value), cols)}
-                  className="w-16 p-2 rounded-lg border border-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 font-mono focus:ring-2 focus:ring-red-500/50 outline-none transition-all shadow-sm"
-                />
+        <div className="flex flex-col w-full">
+          {/* Top Row: Split View */}
+          <div className="flex flex-col md:flex-row w-full border-b border-neutral-300 dark:border-neutral-700 min-h-[720px]">
+            {/* Top-Left: Editor Section */}
+            <div className="md:w-1/2 p-4 md:p-8 pt-24 md:pt-32 bg-neutral-100 dark:bg-neutral-800 flex flex-col gap-6 border-b md:border-b-0 md:border-r border-neutral-300 dark:border-neutral-700">
+              <div className="flex flex-col gap-8">
+                <div className="flex gap-4 items-center">
+                  <div className="flex flex-col">
+                    <label className="text-[10px] uppercase font-bold text-neutral-400 dark:text-neutral-500 mb-1 tracking-wider">Rows</label>
+                    <input
+                      type="number"
+                      value={rows}
+                      onChange={(e) => handleDimensionChange(parseInt(e.target.value), cols)}
+                      className="w-16 p-2 rounded-lg border border-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 font-mono focus:ring-2 focus:ring-red-500/50 outline-none transition-all shadow-sm"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <label className="text-[10px] uppercase font-bold text-neutral-400 dark:text-neutral-500 mb-1 tracking-wider">Cols</label>
+                    <input
+                      type="number"
+                      value={cols}
+                      onChange={(e) => handleDimensionChange(rows, parseInt(e.target.value))}
+                      className="w-16 p-2 rounded-lg border border-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 font-mono focus:ring-2 focus:ring-red-500/50 outline-none transition-all shadow-sm"
+                    />
+                  </div>
+                  <motion.button
+                    onClick={solveRREF}
+                    disabled={!Module}
+                    whileHover={Module ? { scale: 1.02, translateY: -2 } : {}}
+                    whileTap={Module ? { scale: 0.98 } : {}}
+                    className="mt-5 flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-neutral-400 text-white font-bold rounded-xl shadow-lg shadow-red-500/20 relative overflow-hidden group cursor-pointer"
+                  >
+                    {Module && (
+                      <motion.div
+                        initial={{ x: "-100%" }}
+                        animate={{ x: "100%" }}
+                        transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none"
+                      />
+                    )}
+                    <span className="relative z-10">SOLVE RREF</span>
+                  </motion.button>
+                </div>
+
+                <div className="w-full">
+                  <div
+                    className="grid gap-1 p-4 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-xl max-h-[650px] overflow-y-auto"
+                    style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
+                  >
+                    {matrix.map((val, i) => (
+                      <input
+                        key={i}
+                        type="text"
+                        value={val === "0" ? "" : val}
+                        placeholder="0"
+                        onChange={(e) => updateMatrixValue(i, e.target.value)}
+                        className="w-full px-1 py-2 text-center rounded-lg border border-neutral-100 dark:border-neutral-800 dark:bg-neutral-950 font-mono text-sm focus:ring-2 focus:ring-red-500/30 outline-none transition-all hover:bg-neutral-50 dark:hover:bg-neutral-900 shadow-sm"
+                      />
+                    ))}
+                  </div>
+                </div>
               </div>
-              <div className="flex flex-col">
-                <label className="text-[10px] uppercase font-bold text-neutral-400 dark:text-neutral-500 mb-1 tracking-wider">Cols</label>
-                <input
-                  type="number"
-                  value={cols}
-                  onChange={(e) => handleDimensionChange(rows, parseInt(e.target.value))}
-                  className="w-16 p-2 rounded-lg border border-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 font-mono focus:ring-2 focus:ring-red-500/50 outline-none transition-all shadow-sm"
-                />
-              </div>
-              <motion.button
-                onClick={solveRREF}
-                disabled={!Module}
-                whileHover={Module ? { scale: 1.02, translateY: -2 } : {}}
-                whileTap={Module ? { scale: 0.98 } : {}}
-                className="mt-5 flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-neutral-400 text-white font-bold rounded-xl shadow-lg shadow-red-500/20 relative overflow-hidden group cursor-pointer"
-              >
-                {Module && (
-                  <motion.div
-                    initial={{ x: "-100%" }}
-                    animate={{ x: "100%" }}
-                    transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none"
-                  />
-                )}
-                <span className="relative z-10">SOLVE RREF</span>
-              </motion.button>
             </div>
 
-            <div className="w-full">
-              <div
-                className="grid gap-1 p-4 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-xl max-h-[600px] overflow-y-auto"
-                style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
+            {/* Top-Right: Description Section */}
+            <div className="flex-1 p-8 pt-24 md:p-12 md:pt-32 bg-white dark:bg-neutral-900">
+              <motion.div
+                initial={{ x: 20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
               >
-                {matrix.map((val, i) => (
-                  <input
-                    key={i}
-                    type="text"
-                    value={val === "0" ? "" : val}
-                    placeholder="0"
-                    onChange={(e) => updateMatrixValue(i, e.target.value)}
-                    className="w-full px-1 py-2 text-center rounded-lg border border-neutral-100 dark:border-neutral-800 dark:bg-neutral-950 font-mono text-sm focus:ring-2 focus:ring-red-500/30 outline-none transition-all hover:bg-neutral-50 dark:hover:bg-neutral-900 shadow-sm"
-                  />
-                ))}
-              </div>
+                <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-red-400 mb-2">
+                  {title}
+                </h1>
+                <h2 className="text-lg font-semibold text-neutral-600 dark:text-neutral-400 mb-1">
+                  {subtitle}
+                </h2>
+                <span className="inline-block bg-neutral-200 dark:bg-neutral-700 px-2 py-1 rounded text-xs font-bold tracking-widest text-neutral-500 uppercase mb-8">
+                  Data Entry: {date}
+                </span>
+
+                <div className="prose prose-neutral dark:prose-invert">
+                  {description}
+                </div>
+              </motion.div>
             </div>
           </div>
-        </div>
 
-        {/* Right Col: Content */}
-        <div className="flex-1 p-8 pt-24 md:p-12 md:pt-32 w-full md:w-1/2">
-          <motion.div
-            initial={{ x: 20, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-red-400 mb-2">
-              {title}
-            </h1>
-            <h2 className="text-lg font-semibold text-neutral-600 dark:text-neutral-400 mb-1">
-              {subtitle}
-            </h2>
-            <span className="inline-block bg-neutral-200 dark:bg-neutral-700 px-2 py-1 rounded text-xs font-bold tracking-widest text-neutral-500 uppercase mb-8">
-              Data Entry: {date}
-            </span>
-
-            <div className="prose prose-neutral dark:prose-invert">
-              {description}
-            </div>
-
-            <div className="mt-8 border-l-4 border-red-500 pl-4">
-              {/* The Heading - You can change 'Field Footage' to any title */}
-              <h4 className="font-bold text-neutral-900 dark:text-white mb-2">
-                Section Title
+          {/* Bottom Row: Full-width Code Block Section */}
+          <div className="w-full p-8 md:p-12 bg-neutral-100 dark:bg-neutral-800">
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="border-l-4 border-red-500 pl-4"
+            >
+              <h4 className="font-bold text-neutral-900 dark:text-white mb-4">
+                Algorithm Implementation (C++)
               </h4>
-
-              {/* Your New Wrapper Div */}
-              <div className="w-full rounded bg-neutral-50 dark:bg-neutral-900/50 p-4">
+              <div className="w-full rounded bg-white dark:bg-neutral-900/50 shadow-2xl overflow-hidden p-1">
                 <CodeBlock
-                  language="jsx"
-                  filename="DummyComponent.jsx"
-                  highlightLines={[9, 13, 14, 18]}
+                  language="cpp"
+                  filename="rref.cpp"
+                  highlightLines={[]}
                   code={code}
                 />
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
       </Pokedex>
       {/* Mobile Spacer */}
