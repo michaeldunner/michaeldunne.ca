@@ -17,7 +17,43 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
   const [Module, setModule] = useState<EmscriptenModule | null>(null);
   const [rows, setRows] = useState(3);
   const [cols, setCols] = useState(4);
-  const [matrix, setMatrix] = useState<number[]>(new Array(12).fill(0));
+  const [matrix, setMatrix] = useState<string[]>(new Array(12).fill("0"));
+
+  // Helper to convert fractions (1/2) to decimals (0.5)
+  const toDecimal = (val: string): number => {
+    if (val.includes('/')) {
+      const [num, den] = val.split('/').map(Number);
+      if (den === 0) return 0;
+      return num / den;
+    }
+    return parseFloat(val) || 0;
+  };
+
+  // Helper to convert decimals (0.3333) to fractions (1/3) using continued fractions
+  const toFraction = (decimal: number): string => {
+    if (Math.abs(decimal) < 1e-10) return "0";
+    if (Math.abs(decimal - Math.round(decimal)) < 1e-10) return Math.round(decimal).toString();
+
+    const precision = 1e-6;
+
+    let x = decimal;
+    let a = Math.floor(x);
+    let h1 = 1, h2 = a, k1 = 0, k2 = 1;
+
+    while (Math.abs(decimal - h2 / k2) > precision && k2 < 1000) {
+      x = 1 / (x - a);
+      a = Math.floor(x);
+      let h = a * h2 + h1;
+      let k = a * k2 + k1;
+      h1 = h2; h2 = h;
+      k1 = k2; k2 = k;
+    }
+
+    // Simplify signs
+    if (k2 < 0) { h2 = -h2; k2 = -k2; }
+
+    return k2 === 1 ? h2.toString() : `${h2}/${k2}`;
+  };
 
   useEffect(() => {
     console.log("useEffect started for Wasm initialization (Script Tag Mode)");
@@ -83,13 +119,12 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
     const c = Math.max(1, Math.min(10, newCols));
     setRows(r);
     setCols(c);
-    setMatrix(new Array(r * c).fill(0));
+    setMatrix(new Array(r * c).fill("0"));
   };
 
   const updateMatrixValue = (index: number, val: string) => {
-    const newVal = parseFloat(val) || 0;
     const newMatrix = [...matrix];
-    newMatrix[index] = newVal;
+    newMatrix[index] = val;
     setMatrix(newMatrix);
   };
 
@@ -100,16 +135,17 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
         const bytesPerElement = 8; // double
         const dataPtr = Module._malloc(numElements * bytesPerElement);
 
-        // Copy data to Wasm
+        // Map strings to decimals and copy to Wasm
+        const numericData = matrix.map(toDecimal);
         const dataHeap = new Float64Array(Module.HEAPF64.buffer, dataPtr, numElements);
-        dataHeap.set(matrix);
+        dataHeap.set(numericData);
 
         // Call RREF
         Module._rref(dataPtr, rows, cols);
 
-        // Get result
+        // Get result and convert back to fractions
         const resultData = Array.from(new Float64Array(Module.HEAPF64.buffer, dataPtr, numElements));
-        setMatrix(resultData.map(v => Number(v.toFixed(4)))); // Round to 4 decimal places for display
+        setMatrix(resultData.map(v => toFraction(v)));
 
         // Free memory
         Module._free(dataPtr);
@@ -170,9 +206,8 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
                 {matrix.map((val, i) => (
                   <input
                     key={i}
-                    type="number"
-                    step="any"
-                    value={val === 0 ? "" : val}
+                    type="text"
+                    value={val === "0" ? "" : val}
                     placeholder="0"
                     onChange={(e) => updateMatrixValue(i, e.target.value)}
                     className="w-full px-1 py-2 text-center rounded-lg border border-neutral-100 dark:border-neutral-800 dark:bg-neutral-950 font-mono text-sm focus:ring-2 focus:ring-red-500/30 outline-none transition-all hover:bg-neutral-50 dark:hover:bg-neutral-900 shadow-sm"
