@@ -141,18 +141,6 @@ export function PDF() {
                             </div>
                         )}
                     </div>
-
-                    <div className="bg-neutral-200 dark:bg-neutral-700 text-green-700 dark:text-green-400 font-mono p-4 rounded-lg text-sm">
-                        &gt; RELEASED ON 01/09/2026
-                        <br />
-                        &gt; FILES_LOADED: {files.length}
-                        {isMerging && (
-                            <>
-                                <br />
-                                <span className="animate-pulse">&gt; PROCESSING...</span>
-                            </>
-                        )}
-                    </div>
                 </div>
 
                 {/* Right Col: Output & Actions */}
@@ -170,7 +158,7 @@ export function PDF() {
                             sequence.
                         </h2>
                         <span className="inline-block bg-neutral-200 dark:bg-neutral-700 px-2 py-1 rounded text-xs font-bold tracking-widest text-neutral-500 uppercase mb-8">
-                            Version 1.0.0
+                            01/09/2026
                         </span>
 
                         <div className="prose prose-neutral dark:prose-invert mb-8">

@@ -15,9 +15,35 @@ interface CodeProps {
 
 export function Code({ title, subtitle, date, description, code }: CodeProps) {
   const [Module, setModule] = useState<EmscriptenModule | null>(null);
+  type Tab = 'original' | 'rref';
+  const [activeTab, setActiveTab] = useState<Tab>('original');
+  const [history, setHistory] = useState<Record<Tab, { matrix: string[], rows: number, cols: number }>>({
+    original: { matrix: new Array(12).fill("0"), rows: 3, cols: 4 },
+    rref: { matrix: new Array(12).fill("0"), rows: 3, cols: 4 }
+  });
+
   const [rows, setRows] = useState(3);
   const [cols, setCols] = useState(4);
   const [matrix, setMatrix] = useState<string[]>(new Array(12).fill("0"));
+
+  const handleTabChange = (newTab: Tab) => {
+    if (newTab === activeTab) return;
+
+    // Save current working copy to history
+    setHistory(prev => ({
+      ...prev,
+      [activeTab]: { matrix, rows, cols }
+    }));
+
+    // Switch tab
+    setActiveTab(newTab);
+
+    // Load new tab's history into working copy
+    const target = history[newTab];
+    setRows(target.rows);
+    setCols(target.cols);
+    setMatrix(target.matrix);
+  };
 
   // Helper to convert fractions (1/2) to decimals (0.5)
   const toDecimal = (val: string): number => {
@@ -145,7 +171,17 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
 
         // Get result and convert back to fractions
         const resultData = Array.from(new Float64Array(Module.HEAPF64.buffer, dataPtr, numElements));
-        setMatrix(resultData.map(v => toFraction(v)));
+        const fractionalResults = resultData.map(v => toFraction(v));
+
+        // Commit current state and result to history
+        setHistory({
+          original: { matrix: [...matrix], rows, cols },
+          rref: { matrix: fractionalResults, rows, cols }
+        });
+
+        // Load RREF into editor and switch tab
+        setMatrix(fractionalResults);
+        setActiveTab('rref');
 
         // Free memory
         Module._free(dataPtr);
@@ -160,63 +196,87 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
       <Pokedex>
         <div className="flex flex-col w-full">
           {/* Top Row: Split View */}
-          <div className="flex flex-col md:flex-row w-full border-b border-neutral-300 dark:border-neutral-700 min-h-[720px]">
+          <div className="flex flex-col md:flex-row w-full border-b border-neutral-300 dark:border-neutral-700 min-h-[800px]">
             {/* Top-Left: Editor Section */}
             <div className="md:w-1/2 p-4 md:p-8 pt-24 md:pt-32 bg-neutral-100 dark:bg-neutral-800 flex flex-col gap-6 border-b md:border-b-0 md:border-r border-neutral-300 dark:border-neutral-700">
-              <div className="flex flex-col gap-8">
-                <div className="flex gap-4 items-center">
-                  <div className="flex flex-col">
-                    <label className="text-[10px] uppercase font-bold text-neutral-400 dark:text-neutral-500 mb-1 tracking-wider">Rows</label>
-                    <input
-                      type="number"
-                      value={rows}
-                      onChange={(e) => handleDimensionChange(parseInt(e.target.value), cols)}
-                      className="w-16 p-2 rounded-lg border border-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 font-mono focus:ring-2 focus:ring-red-500/50 outline-none transition-all shadow-sm"
-                    />
-                  </div>
-                  <div className="flex flex-col">
-                    <label className="text-[10px] uppercase font-bold text-neutral-400 dark:text-neutral-500 mb-1 tracking-wider">Cols</label>
-                    <input
-                      type="number"
-                      value={cols}
-                      onChange={(e) => handleDimensionChange(rows, parseInt(e.target.value))}
-                      className="w-16 p-2 rounded-lg border border-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 font-mono focus:ring-2 focus:ring-red-500/50 outline-none transition-all shadow-sm"
-                    />
-                  </div>
-                  <motion.button
-                    onClick={solveRREF}
-                    disabled={!Module}
-                    whileHover={Module ? { scale: 1.02, translateY: -2 } : {}}
-                    whileTap={Module ? { scale: 0.98 } : {}}
-                    className="mt-5 flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-neutral-400 text-white font-bold rounded-xl shadow-lg shadow-red-500/20 relative overflow-hidden group cursor-pointer"
+              <div className="flex flex-col">
+                {/* History Tabs */}
+                <div className="flex gap-1 -mb-[1px] relative z-20">
+                  <button
+                    onClick={() => handleTabChange('original')}
+                    className={`px-6 py-2 rounded-t-xl text-[10px] uppercase font-bold tracking-widest transition-all ${activeTab === 'original'
+                      ? "bg-white dark:bg-neutral-900 text-red-600 border-t border-l border-r border-neutral-200 dark:border-neutral-700 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]"
+                      : "bg-neutral-200/50 dark:bg-neutral-800/50 text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-800"
+                      }`}
                   >
-                    {Module && (
-                      <motion.div
-                        initial={{ x: "-100%" }}
-                        animate={{ x: "100%" }}
-                        transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none"
-                      />
-                    )}
-                    <span className="relative z-10">SOLVE RREF</span>
-                  </motion.button>
+                    Original
+                  </button>
+                  <button
+                    onClick={() => handleTabChange('rref')}
+                    className={`px-6 py-2 rounded-t-xl text-[10px] uppercase font-bold tracking-widest transition-all ${activeTab === 'rref'
+                      ? "bg-white dark:bg-neutral-900 text-red-600 border-t border-l border-r border-neutral-200 dark:border-neutral-700 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]"
+                      : "bg-neutral-200/50 dark:bg-neutral-800/50 text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-800"
+                      }`}
+                  >
+                    RREF Results
+                  </button>
                 </div>
 
-                <div className="w-full">
-                  <div
-                    className="grid gap-1 p-4 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-xl max-h-[650px] overflow-y-auto"
-                    style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
-                  >
-                    {matrix.map((val, i) => (
+                <div className="flex flex-col gap-8 bg-white dark:bg-neutral-900 p-6 rounded-b-2xl rounded-tr-2xl border border-neutral-200 dark:border-neutral-700 shadow-xl relative z-10">
+                  <div className="flex gap-4 items-center">
+                    <div className="flex flex-col">
+                      <label className="text-[10px] uppercase font-bold text-neutral-400 dark:text-neutral-500 mb-1 tracking-wider">Rows</label>
                       <input
-                        key={i}
-                        type="text"
-                        value={val === "0" ? "" : val}
-                        placeholder="0"
-                        onChange={(e) => updateMatrixValue(i, e.target.value)}
-                        className="w-full px-1 py-2 text-center rounded-lg border border-neutral-100 dark:border-neutral-800 dark:bg-neutral-950 font-mono text-sm focus:ring-2 focus:ring-red-500/30 outline-none transition-all hover:bg-neutral-50 dark:hover:bg-neutral-900 shadow-sm"
+                        type="number"
+                        value={rows}
+                        onChange={(e) => handleDimensionChange(parseInt(e.target.value), cols)}
+                        className="w-16 p-2 rounded-lg border border-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 font-mono focus:ring-2 focus:ring-red-500/50 outline-none transition-all shadow-sm"
                       />
-                    ))}
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="text-[10px] uppercase font-bold text-neutral-400 dark:text-neutral-500 mb-1 tracking-wider">Cols</label>
+                      <input
+                        type="number"
+                        value={cols}
+                        onChange={(e) => handleDimensionChange(rows, parseInt(e.target.value))}
+                        className="w-16 p-2 rounded-lg border border-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 font-mono focus:ring-2 focus:ring-red-500/50 outline-none transition-all shadow-sm"
+                      />
+                    </div>
+                    <motion.button
+                      onClick={solveRREF}
+                      disabled={!Module}
+                      whileHover={Module ? { scale: 1.02, translateY: -2 } : {}}
+                      whileTap={Module ? { scale: 0.98 } : {}}
+                      className="mt-5 flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-neutral-400 text-white font-bold rounded-xl shadow-lg shadow-red-500/20 relative overflow-hidden group cursor-pointer"
+                    >
+                      {Module && (
+                        <motion.div
+                          initial={{ x: "-100%" }}
+                          animate={{ x: "100%" }}
+                          transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none"
+                        />
+                      )}
+                      <span className="relative z-10">SOLVE RREF</span>
+                    </motion.button>
+                  </div>
+
+                  <div className="w-full">
+                    <div
+                      className="grid gap-1 p-4 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-xl max-h-[650px] overflow-y-auto"
+                      style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
+                    >
+                      {matrix.map((val, i) => (
+                        <input
+                          key={i}
+                          type="text"
+                          value={val === "0" ? "" : val}
+                          placeholder="0"
+                          onChange={(e) => updateMatrixValue(i, e.target.value)}
+                          className="w-full px-1 py-2 text-center rounded-lg border border-neutral-100 dark:border-neutral-800 dark:bg-neutral-950 font-mono text-sm focus:ring-2 focus:ring-red-500/30 outline-none transition-all hover:bg-neutral-50 dark:hover:bg-neutral-900 shadow-sm"
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -236,7 +296,7 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
                   {subtitle}
                 </h2>
                 <span className="inline-block bg-neutral-200 dark:bg-neutral-700 px-2 py-1 rounded text-xs font-bold tracking-widest text-neutral-500 uppercase mb-8">
-                  Data Entry: {date}
+                  {date}
                 </span>
 
                 <div className="prose prose-neutral dark:prose-invert">
@@ -255,7 +315,7 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
               className="border-l-4 border-red-500 pl-4"
             >
               <h4 className="font-bold text-neutral-900 dark:text-white mb-4">
-                Algorithm Implementation (C++)
+                Source Code (C++)
               </h4>
               <div className="w-full rounded bg-white dark:bg-neutral-900/50 shadow-2xl overflow-hidden p-1">
                 <CodeBlock

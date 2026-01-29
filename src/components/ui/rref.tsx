@@ -4,9 +4,9 @@ import { Code } from "./code";
 export function RREF() {
   return (
     <Code
-      title="#130 The Atrocious"
-      subtitle="Gyarados"
-      date="2026-01-06"
+      title="RREF Solver"
+      subtitle="Put any matrix into reduced row echelon form."
+      date="01/29/2026"
       code={`#include <iostream>
 #include <vector>
 
@@ -158,10 +158,10 @@ int main() {
 }
 `}
       description={
-        <>
+        <div className="flex flex-col gap-4">
           <p>
             This is C++ code I wrote to find the reduced row echelon form of a
-            matrix. It definbitley isn't the most efficient way to do it, but it
+            matrix. It definitely isn't the most efficient way to do it, but it
             works and was a fun challenge for me to complete.
           </p>
           <p>
@@ -171,9 +171,12 @@ int main() {
             Once webassembly was installed integrating it into the site and pre-written C++ code was even harder.
           </p>
           <p>
-            If anyone else were to attempt ths project, In would recommend just using TypeScript.
+            If anyone else were to attempt ths project, In would recommend just writing the solver in TypeScript.
           </p>
-        </>
+          <p>
+            Check out the source code below.
+          </p>
+        </div>
       }
     />
   );
