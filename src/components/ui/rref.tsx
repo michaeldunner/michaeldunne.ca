@@ -174,7 +174,7 @@ int main() {
             If anyone else were to attempt ths project, In would recommend just writing the solver in TypeScript.
           </p>
           <p>
-            Check out the source code below.
+            Check out the original source code below. It has since been modified to work with WebAssembly.
           </p>
         </div>
       }

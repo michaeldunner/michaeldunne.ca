@@ -19,6 +19,7 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
   type Tab = 'original' | 'rref';
   const [activeTab, setActiveTab] = useState<Tab>('original');
   const [isMobile, setIsMobile] = useState(false);
+  const [displayMode, setDisplayMode] = useState<'fraction' | 'decimal'>('fraction');
   const [history, setHistory] = useState<Record<Tab, { matrix: string[], rows: number, cols: number }>>({
     original: { matrix: new Array(12).fill("0"), rows: 3, cols: 4 },
     rref: { matrix: new Array(12).fill("0"), rows: 3, cols: 4 }
@@ -281,15 +282,34 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
                     </button>
                   </div>
 
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => toggleFocusMode(!isFocusMode)}
-                    className="p-2 text-neutral-400 hover:text-red-500 transition-colors"
-                    title={isFocusMode ? "Minimize Editor" : "Expand Editor"}
-                  >
-                    {isFocusMode ? <IconMinimize size={20} /> : <IconMaximize size={20} />}
-                  </motion.button>
+                  <div className="flex items-center gap-4">
+                    {activeTab === 'rref' && (
+                      <div className="flex bg-neutral-200/50 dark:bg-neutral-800/50 p-1 rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-inner">
+                        <button
+                          onClick={() => setDisplayMode('fraction')}
+                          className={`px-4 py-1.5 text-[10px] font-bold rounded-lg transition-all tracking-widest ${displayMode === 'fraction' ? 'bg-white dark:bg-neutral-700 text-red-600 shadow-md' : 'text-neutral-500 hover:text-neutral-700'}`}
+                        >
+                          FRACTIONS
+                        </button>
+                        <button
+                          onClick={() => setDisplayMode('decimal')}
+                          className={`px-4 py-1.5 text-[10px] font-bold rounded-lg transition-all tracking-widest ${displayMode === 'decimal' ? 'bg-white dark:bg-neutral-700 text-red-600 shadow-md' : 'text-neutral-500 hover:text-neutral-700'}`}
+                        >
+                          DECIMALS
+                        </button>
+                      </div>
+                    )}
+
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => toggleFocusMode(!isFocusMode)}
+                      className="p-2 text-neutral-400 hover:text-red-500 transition-colors"
+                      title={isFocusMode ? "Minimize Editor" : "Expand Editor"}
+                    >
+                      {isFocusMode ? <IconMinimize size={20} /> : <IconMaximize size={20} />}
+                    </motion.button>
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-8 bg-white dark:bg-neutral-900 p-6 rounded-b-2xl rounded-tr-2xl border border-neutral-200 dark:border-neutral-700 shadow-xl relative z-10">
@@ -337,16 +357,24 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
                       className="grid gap-1 p-4 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-xl max-h-[650px] overflow-y-auto"
                       style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
                     >
-                      {matrix.map((val, i) => (
-                        <input
-                          key={i}
-                          type="text"
-                          value={val === "0" ? "" : val}
-                          placeholder="0"
-                          onChange={(e) => updateMatrixValue(i, e.target.value)}
-                          className={`w-full text-center rounded-lg border border-neutral-100 dark:border-neutral-800 dark:bg-neutral-950 font-mono focus:ring-2 focus:ring-red-500/30 outline-none transition-all hover:bg-neutral-50 dark:hover:bg-neutral-900 shadow-sm py-2 text-sm ${isFocusMode ? 'px-4' : 'px-1'}`}
-                        />
-                      ))}
+                      {matrix.map((val, i) => {
+                        let displayVal = val === "0" ? "" : val;
+                        if (activeTab === 'rref' && displayMode === 'decimal' && val !== "0") {
+                          const num = toDecimal(val);
+                          displayVal = Number.isInteger(num) ? num.toString() : num.toFixed(4);
+                        }
+                        return (
+                          <input
+                            key={i}
+                            type="text"
+                            value={displayVal}
+                            placeholder="0"
+                            readOnly={activeTab === 'rref' && displayMode === 'decimal'}
+                            onChange={(e) => updateMatrixValue(i, e.target.value)}
+                            className={`w-full text-center rounded-lg border border-neutral-100 dark:border-neutral-800 dark:bg-neutral-950 font-mono focus:ring-2 focus:ring-red-500/30 outline-none transition-all hover:bg-neutral-50 dark:hover:bg-neutral-900 shadow-sm py-2 text-sm ${isFocusMode ? 'px-4' : 'px-1'} ${activeTab === 'rref' && displayMode === 'decimal' ? 'cursor-not-allowed' : ''}`}
+                          />
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
@@ -367,6 +395,9 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
             >
               <motion.div
                 layout="position"
+                initial={{ x: 20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
               >
                 <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-red-400 mb-2">
                   {title}
@@ -390,7 +421,7 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.4 }}
+              transition={{ delay: 0.5 }}
               className="border-l-4 border-red-500 pl-4"
             >
               <h4 className="font-bold text-neutral-900 dark:text-white mb-4">
