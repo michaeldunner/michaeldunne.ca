@@ -1,8 +1,8 @@
 import { EncryptedText } from "./encrypted-text";
 import { NowPlayingCard } from "./now-playing";
 import { PokemonCard } from "./pokemon-card";
-import charizard from "../../assets/charizard.jpg";
 import pdf from "../../assets/pdf.png";
+import rref from "../../assets/rref.png";
 import { LetterboxdCard } from "./letterboxd";
 import { motion } from "motion/react";
 
@@ -124,12 +124,12 @@ function Home() {
             className="flex items-center justify-center"
           >
             <PokemonCard
-              imageURL={charizard}
-              colour="bg-red-500"
-              name="Charizard"
-              title="This is a sample card"
-              text="This is a sample card"
-              to="#"
+              imageURL={rref}
+              colour="bg-purple-500"
+              name="RREF Solver"
+              title="Reduced Row Echelon Form"
+              text="I made this because I wanted a way to easily solve systems of linear equations"
+              to="/rref"
             />
           </motion.div>
         </motion.div>
