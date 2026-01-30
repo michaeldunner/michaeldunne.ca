@@ -3,7 +3,8 @@ import { motion } from "motion/react";
 import { Pokedex } from "./pokedex";
 import { CodeBlock } from "./code-block";
 import type { EmscriptenModule } from "../../cpp/rref.js";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { IconMaximize, IconMinimize } from "@tabler/icons-react";
 
 interface CodeProps {
   title: string;
@@ -17,6 +18,7 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
   const [Module, setModule] = useState<EmscriptenModule | null>(null);
   type Tab = 'original' | 'rref';
   const [activeTab, setActiveTab] = useState<Tab>('original');
+  const [isMobile, setIsMobile] = useState(false);
   const [history, setHistory] = useState<Record<Tab, { matrix: string[], rows: number, cols: number }>>({
     original: { matrix: new Array(12).fill("0"), rows: 3, cols: 4 },
     rref: { matrix: new Array(12).fill("0"), rows: 3, cols: 4 }
@@ -25,6 +27,51 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
   const [rows, setRows] = useState(3);
   const [cols, setCols] = useState(4);
   const [matrix, setMatrix] = useState<string[]>(new Array(12).fill("0"));
+
+  // Focus Mode State
+  const [isFocusMode, setIsFocusMode] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const scrollPosRef = useRef<number>(0);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const toggleFocusMode = (val: boolean) => {
+    if (val === isFocusMode) return;
+
+    if (val) {
+      // Entering: Capture scroll position
+      if (scrollContainerRef.current) {
+        scrollPosRef.current = scrollContainerRef.current.scrollTop;
+      }
+    }
+
+    setIsFocusMode(val);
+
+    if (!val) {
+      // Exiting: Restore scroll position after a short delay for layout to settle
+      setTimeout(() => {
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.scrollTop = scrollPosRef.current;
+        }
+      }, 10);
+    }
+  };
+
+  // Keyboard support for ESC
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isFocusMode) {
+        toggleFocusMode(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isFocusMode]);
 
   const handleTabChange = (newTab: Tab) => {
     if (newTab === activeTab) return;
@@ -190,36 +237,59 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
       }
     }
   };
-
   return (
-    <div className="h-full w-full bg-white dark:bg-neutral-950 p-4 md:p-8 overflow-y-auto">
+    <div
+      ref={scrollContainerRef}
+      className="md:h-full min-h-screen w-full bg-white dark:bg-neutral-950 p-4 md:p-8 overflow-y-auto"
+    >
       <Pokedex>
         <div className="flex flex-col w-full">
-          {/* Top Row: Split View */}
-          <div className="flex flex-col md:flex-row w-full border-b border-neutral-300 dark:border-neutral-700 min-h-[800px]">
+          {/* Top Row: Split View / Panel Takeover - COORDINATED GRID ANIMATION */}
+          <motion.div
+            animate={{
+              gridTemplateColumns: isMobile ? "1fr" : (isFocusMode ? "1fr 0fr" : "1fr 1fr")
+            }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="grid grid-cols-1 md:grid-cols-[1fr_1fr] items-stretch w-full border-b border-neutral-300 dark:border-neutral-700 md:h-[800px] h-auto md:overflow-hidden"
+          >
             {/* Top-Left: Editor Section */}
-            <div className="md:w-1/2 p-4 md:p-8 pt-24 md:pt-32 bg-neutral-100 dark:bg-neutral-800 flex flex-col gap-6 border-b md:border-b-0 md:border-r border-neutral-300 dark:border-neutral-700">
+            <motion.div
+              layout="position"
+              className={`p-8 pt-24 md:p-8 md:pt-32 bg-neutral-100 dark:bg-neutral-800 flex flex-col gap-6 border-b md:border-b-0 border-neutral-300 dark:border-neutral-700 md:overflow-hidden relative z-0 ${!isFocusMode ? 'md:border-r' : ''}`}
+            >
               <div className="flex flex-col">
-                {/* History Tabs */}
-                <div className="flex gap-1 -mb-[1px] relative z-20">
-                  <button
-                    onClick={() => handleTabChange('original')}
-                    className={`px-6 py-2 rounded-t-xl text-[10px] uppercase font-bold tracking-widest transition-all ${activeTab === 'original'
-                      ? "bg-white dark:bg-neutral-900 text-red-600 border-t border-l border-r border-neutral-200 dark:border-neutral-700 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]"
-                      : "bg-neutral-200/50 dark:bg-neutral-800/50 text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-800"
-                      }`}
+                {/* Header with History Tabs and Expand Button */}
+                <div className="flex items-center justify-between gap-1 -mb-[1px] relative z-20">
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => handleTabChange('original')}
+                      className={`px-6 py-2 rounded-t-xl text-[10px] uppercase font-bold tracking-widest transition-all ${activeTab === 'original'
+                        ? "bg-white dark:bg-neutral-900 text-red-600 border-t border-l border-r border-neutral-200 dark:border-neutral-700 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]"
+                        : "bg-neutral-200/50 dark:bg-neutral-800/50 text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-800"
+                        }`}
+                    >
+                      Original
+                    </button>
+                    <button
+                      onClick={() => handleTabChange('rref')}
+                      className={`px-6 py-2 rounded-t-xl text-[10px] uppercase font-bold tracking-widest transition-all ${activeTab === 'rref'
+                        ? "bg-white dark:bg-neutral-900 text-red-600 border-t border-l border-r border-neutral-200 dark:border-neutral-700 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]"
+                        : "bg-neutral-200/50 dark:bg-neutral-800/50 text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-800"
+                        }`}
+                    >
+                      Results
+                    </button>
+                  </div>
+
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => toggleFocusMode(!isFocusMode)}
+                    className="p-2 text-neutral-400 hover:text-red-500 transition-colors"
+                    title={isFocusMode ? "Minimize Editor" : "Expand Editor"}
                   >
-                    Original
-                  </button>
-                  <button
-                    onClick={() => handleTabChange('rref')}
-                    className={`px-6 py-2 rounded-t-xl text-[10px] uppercase font-bold tracking-widest transition-all ${activeTab === 'rref'
-                      ? "bg-white dark:bg-neutral-900 text-red-600 border-t border-l border-r border-neutral-200 dark:border-neutral-700 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]"
-                      : "bg-neutral-200/50 dark:bg-neutral-800/50 text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-800"
-                      }`}
-                  >
-                    RREF Results
-                  </button>
+                    {isFocusMode ? <IconMinimize size={20} /> : <IconMaximize size={20} />}
+                  </motion.button>
                 </div>
 
                 <div className="flex flex-col gap-8 bg-white dark:bg-neutral-900 p-6 rounded-b-2xl rounded-tr-2xl border border-neutral-200 dark:border-neutral-700 shadow-xl relative z-10">
@@ -234,7 +304,7 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
                       />
                     </div>
                     <div className="flex flex-col">
-                      <label className="text-[10px] uppercase font-bold text-neutral-400 dark:text-neutral-500 mb-1 tracking-wider">Cols</label>
+                      <label className="text-[10px] uppercase font-bold text-neutral-400 dark:text-neutral-500 mb-1 tracking-wider">Columns</label>
                       <input
                         type="number"
                         value={cols}
@@ -243,11 +313,12 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
                       />
                     </div>
                     <motion.button
+                      layout="position"
                       onClick={solveRREF}
                       disabled={!Module}
                       whileHover={Module ? { scale: 1.02, translateY: -2 } : {}}
                       whileTap={Module ? { scale: 0.98 } : {}}
-                      className="mt-5 flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-neutral-400 text-white font-bold rounded-xl shadow-lg shadow-red-500/20 relative overflow-hidden group cursor-pointer"
+                      className="mt-5 px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-neutral-400 text-white font-bold rounded-xl shadow-lg shadow-red-500/20 relative overflow-hidden group cursor-pointer ml-auto"
                     >
                       {Module && (
                         <motion.div
@@ -273,21 +344,29 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
                           value={val === "0" ? "" : val}
                           placeholder="0"
                           onChange={(e) => updateMatrixValue(i, e.target.value)}
-                          className="w-full px-1 py-2 text-center rounded-lg border border-neutral-100 dark:border-neutral-800 dark:bg-neutral-950 font-mono text-sm focus:ring-2 focus:ring-red-500/30 outline-none transition-all hover:bg-neutral-50 dark:hover:bg-neutral-900 shadow-sm"
+                          className={`w-full text-center rounded-lg border border-neutral-100 dark:border-neutral-800 dark:bg-neutral-950 font-mono focus:ring-2 focus:ring-red-500/30 outline-none transition-all hover:bg-neutral-50 dark:hover:bg-neutral-900 shadow-sm py-2 text-sm ${isFocusMode ? 'px-4' : 'px-1'}`}
                         />
                       ))}
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            {/* Top-Right: Description Section */}
-            <div className="flex-1 p-8 pt-24 md:p-12 md:pt-32 bg-white dark:bg-neutral-900">
+            {/* Top-Right: Description Section (Collapsed in Focus Mode) */}
+            <motion.div
+              layout="position"
+              initial={false}
+              animate={{
+                opacity: (!isMobile && isFocusMode) ? 0 : 1,
+                paddingLeft: (!isMobile && isFocusMode) ? 0 : undefined,
+                paddingRight: (!isMobile && isFocusMode) ? 0 : undefined,
+                pointerEvents: (!isMobile && isFocusMode) ? 'none' : 'auto'
+              }}
+              className="p-8 pt-24 md:p-12 md:pt-32 bg-white dark:bg-neutral-900 md:overflow-hidden relative z-0"
+            >
               <motion.div
-                initial={{ x: 20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.2 }}
+                layout="position"
               >
                 <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-red-400 mb-2">
                   {title}
@@ -303,11 +382,11 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
                   {description}
                 </div>
               </motion.div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
-          {/* Bottom Row: Full-width Code Block Section */}
-          <div className="w-full p-8 md:p-12 bg-neutral-100 dark:bg-neutral-800">
+          {/* Bottom Row: Full-width Code Block Section (Always visible) */}
+          <div className="w-full p-8 md:p-12 bg-neutral-100 dark:bg-neutral-800 border-t border-neutral-300 dark:border-neutral-700">
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}

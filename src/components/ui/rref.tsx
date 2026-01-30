@@ -13,12 +13,12 @@ export function RREF() {
 int main() {
     class Row {
        public:
-        Row(int cols) {
-            numberOfCols = cols;
+        Row(int columns) {
+            numberOfColumns = columns;
         }
 
         void createRow() {
-            for (int column = 0; column < numberOfCols; ++column) {
+            for (int column = 0; column < numberOfColumns; ++column) {
                 double value;
                 std::cin >> value;
                 elements.push_back(value);
@@ -40,12 +40,12 @@ int main() {
         }
 
         int getLeadingColumn() {
-            for (int column = 0; column < numberOfCols; ++column) {
+            for (int column = 0; column < numberOfColumns; ++column) {
                 if (elements[column] != 0) {
                     return column;
                 }
             }
-            return numberOfCols;
+            return numberOfColumns;
         }
 
         double getLeadingValue() {
@@ -54,27 +54,27 @@ int main() {
         }
 
         void reduce(double reducer) {
-            for (int i = 0; i < numberOfCols; ++i) {
+            for (int i = 0; i < numberOfColumns; ++i) {
                 elements[i] = elements[i] / reducer;
             }
             return;
         }
 
        private:
-        int numberOfCols;
+        int numberOfColumns;
         std::vector<double> elements;
     };
 
     class Matrix {
        public:
-        Matrix(int rows, int cols) {
+        Matrix(int rows, int columns) {
             numberOfRows = rows;
-            numberOfCols = cols;
+            numberOfColumns = columns;
         }
 
         void createMatrix() {
             for (int i = 0; i < numberOfRows; ++i) {
-                Row row(numberOfCols);
+                Row row(numberOfColumns);
                 row.createRow();
                 matrix.push_back(row);
             }
@@ -83,7 +83,7 @@ int main() {
         void printMatrix() {
             for (int row = 0; row < numberOfRows; ++row) {
                 std::cout << "[\t";
-                for (int column = 0; column < numberOfCols; ++column) {
+                for (int column = 0; column < numberOfColumns; ++column) {
                     std::cout << matrix[row].getElement(column) << "\t";
                 }
                 std::cout << "]" << std::endl;
@@ -91,7 +91,7 @@ int main() {
         }
 
         void reduce() {
-            for (int column = reducedColumns; column < numberOfCols; ++column) {
+            for (int column = reducedColumns; column < numberOfColumn s; ++column) {
                 bool topRow = true;
                 int currentRow = reducedRows;
                 for (int row = reducedRows; row < numberOfRows; ++row) {
@@ -147,9 +147,9 @@ int main() {
     };
 
     int rows = 0;
-    int cols = 0;
-    std::cin >> rows >> cols;
-    Matrix test(rows, cols);
+    int columns = 0;
+    std::cin >> rows >> columns;
+    Matrix test(rows, columns);
     test.createMatrix();
     test.printMatrix();
     std::cout << std::endl;

@@ -22,7 +22,6 @@ export function Article({
   subtitle,
   date,
   description,
-  statusLines,
   videoUrl,
 }: ArticleProps) {
   const [currentIdx, setCurrentIdx] = useState(0);
