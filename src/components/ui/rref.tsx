@@ -174,7 +174,7 @@ int main() {
             If anyone else were to attempt ths project, In would recommend just writing the solver in TypeScript.
           </p>
           <p>
-            Check out the original source code below. It has since been modified to work with WebAssembly.
+            Check out the original source code below. It has since been modified to work with WebAssembly, and new features have been implemented, such as BEDMAS and complex numbers.
           </p>
         </div>
       }

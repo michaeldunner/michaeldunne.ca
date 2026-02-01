@@ -5,6 +5,7 @@ import { CodeBlock } from "./code-block";
 import type { EmscriptenModule } from "../../cpp/rref.js";
 import { useState, useEffect, useRef } from "react";
 import { IconMaximize, IconMinimize } from "@tabler/icons-react";
+import { parseExpression } from "../../lib/expression-parser";
 
 interface CodeProps {
   title: string;
@@ -33,6 +34,7 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
   const [isFocusMode, setIsFocusMode] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const scrollPosRef = useRef<number>(0);
+  const [inputErrors, setInputErrors] = useState<Record<number, string>>({});
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -93,14 +95,17 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
     setMatrix(target.matrix);
   };
 
-  // Helper to convert fractions (1/2) to decimals (0.5)
+  // Helper to convert expressions/fractions to decimals using the BEDMAS parser
   const toDecimal = (val: string): number => {
-    if (val.includes('/')) {
-      const [num, den] = val.split('/').map(Number);
-      if (den === 0) return 0;
-      return num / den;
-    }
-    return parseFloat(val) || 0;
+    const result = parseExpression(val);
+    return result.value;
+  };
+
+  // Validate a matrix value and return error if invalid
+  const validateValue = (val: string): string | undefined => {
+    if (!val || !val.trim()) return undefined;
+    const result = parseExpression(val);
+    return result.error;
   };
 
   // Helper to convert decimals (0.3333) to fractions (1/3) using continued fractions
@@ -200,6 +205,18 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
     const newMatrix = [...matrix];
     newMatrix[index] = val;
     setMatrix(newMatrix);
+
+    // Validate and update errors
+    const error = validateValue(val);
+    setInputErrors(prev => {
+      const next = { ...prev };
+      if (error) {
+        next[index] = error;
+      } else {
+        delete next[index];
+      }
+      return next;
+    });
   };
 
   const solveRREF = () => {
@@ -363,15 +380,17 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
                           const num = toDecimal(val);
                           displayVal = Number.isInteger(num) ? num.toString() : num.toFixed(4);
                         }
+                        const hasError = inputErrors[i] !== undefined;
                         return (
                           <input
                             key={i}
                             type="text"
                             value={displayVal}
                             placeholder="0"
+                            title={hasError ? inputErrors[i] : undefined}
                             readOnly={activeTab === 'rref' && displayMode === 'decimal'}
                             onChange={(e) => updateMatrixValue(i, e.target.value)}
-                            className={`w-full text-center rounded-lg border border-neutral-100 dark:border-neutral-800 dark:bg-neutral-950 font-mono focus:ring-2 focus:ring-red-500/30 outline-none transition-all hover:bg-neutral-50 dark:hover:bg-neutral-900 shadow-sm py-2 text-sm ${isFocusMode ? 'px-4' : 'px-1'} ${activeTab === 'rref' && displayMode === 'decimal' ? 'cursor-not-allowed' : ''}`}
+                            className={`w-full text-center rounded-lg border font-mono focus:ring-2 outline-none transition-all shadow-sm py-2 text-sm ${isFocusMode ? 'px-4' : 'px-1'} ${activeTab === 'rref' && displayMode === 'decimal' ? 'cursor-not-allowed' : ''} ${hasError ? 'border-red-500 bg-red-50 dark:bg-red-950/30 focus:ring-red-500/50' : 'border-neutral-100 dark:border-neutral-800 dark:bg-neutral-950 focus:ring-red-500/30 hover:bg-neutral-50 dark:hover:bg-neutral-900'}`}
                           />
                         );
                       })}
