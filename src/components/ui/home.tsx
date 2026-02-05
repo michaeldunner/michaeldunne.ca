@@ -2,6 +2,7 @@ import { EncryptedText } from "./encrypted-text";
 import { NowPlayingCard } from "./now-playing";
 import { PokemonCard } from "./pokemon-card";
 import charizard from "../../assets/charizard.jpg";
+import choreo from "../../assets/choreo.png";
 import pdf from "../../assets/pdf.png";
 import { LetterboxdCard } from "./letterboxd";
 import { motion } from "motion/react";
@@ -123,13 +124,21 @@ function Home() {
             }}
             className="flex items-center justify-center"
           >
-            <PokemonCard
+            {/* <PokemonCard
               imageURL={charizard}
               colour="bg-red-500"
               name="Charizard"
               title="This is a sample card"
               text="This is a sample card"
               to="#"
+            /> */}
+            <PokemonCard
+              imageURL={choreo}
+              colour="bg-red-500"
+              name="FRC Trajectory Visualizer"
+              title="Visualize Multiple Choreo Trajectories"
+              text="I made this because I thought it would be useful to the FRC team I mentor"
+              to="/choreo"
             />
           </motion.div>
         </motion.div>
