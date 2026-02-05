@@ -56,35 +56,43 @@ export function Article({
   };
 
   return (
-    <div className="h-full w-full bg-white dark:bg-neutral-950 p-4 md:p-8 overflow-y-auto">
+    <div className="min-h-screen w-full bg-white dark:bg-neutral-950 p-4 md:p-8">
       <Pokedex>
-        {/* Left Col: Visuals (Sticky on Desktop) */}
-        <div className="md:w-1/2 p-8 pt-24 bg-neutral-100 dark:bg-neutral-800 flex flex-col gap-6 border-b md:border-b-0 md:border-r border-neutral-300 dark:border-neutral-700">
-          <ImageSlideshow
-            images={images}
-            currentIdx={currentIdx}
-            handleImageClick={handleImageClick}
-          />
+        {/* Left Column: Visualizer & Timeline */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ type: "spring", stiffness: 260, damping: 20 }}
+          className="p-6 pt-24 md:p-8 md:pt-32 bg-neutral-100 dark:bg-neutral-800 flex flex-col gap-6 border-b md:border-b-0 md:border-r border-neutral-300 dark:border-neutral-700 relative"
+        >
+          <div className="max-w-[650px] mx-auto w-full">
+            <ImageSlideshow
+              images={images}
+              currentIdx={currentIdx}
+              handleImageClick={handleImageClick}
+            />
+          </div>
 
           {/* Controls: D-Pad and DJ Board */}
-          <div className="flex items-center justify-between gap-8 mb-4">
+          <div className="flex items-center justify-center gap-32 mb-4">
             <DPad onNext={handleNext} onPrev={handlePrev} />
 
             {/* DJ Button Board */}
-            <div className="grid grid-cols-3 gap-3 pr-4">
+            <div className="grid grid-cols-3 gap-4 pr-4">
               {[...Array(6)].map((_, i) => (
                 <DJButton key={i} note={i} />
               ))}
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Right Col: Content */}
-        <div className="md:w-1/2 p-8 pt-24 md:p-12 md:pt-24 overflow-y-auto">
+        <div className="md:w-1/2 p-8 pt-24 md:p-12 md:pt-24">
           <motion.div
-            initial={{ x: 20, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+            className="w-full h-full p-4 md:p-8"
           >
             <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-red-400 mb-2">
               {title}
@@ -93,7 +101,7 @@ export function Article({
               {subtitle}
             </h2>
             <span className="inline-block bg-neutral-200 dark:bg-neutral-700 px-2 py-1 rounded text-xs font-bold tracking-widest text-neutral-500 uppercase mb-8">
-              CHANGE THIS TO SOMETHINGData Entry: {date}
+              Data Entry: {date}
             </span>
 
             <div className="prose prose-neutral dark:prose-invert">

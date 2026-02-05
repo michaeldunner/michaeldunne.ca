@@ -7,10 +7,10 @@ interface PokedexProps {
 export function Pokedex({ children }: PokedexProps) {
     return (
         <div
-            className="w-full max-w-5xl mx-auto bg-neutral-50 dark:bg-neutral-900 rounded-3xl overflow-hidden flex flex-col md:flex-row min-h-[80vh] border-8 border-red-700 relative"
+            className="w-full bg-neutral-50 dark:bg-neutral-900 rounded-3xl overflow-hidden flex flex-col md:flex-row border-8 border-red-700 relative"
             style={{
                 clipPath:
-                    "polygon(0 0, 45% 0, 50% 56px, 100% 56px, 100% 100%, 0 100%)",
+                    "polygon(0 0, 43% 0, 45% 56px, 100% 56px, 100% 100%, 0 100%)",
             }}
         >
             {/* Top Decoration */}
