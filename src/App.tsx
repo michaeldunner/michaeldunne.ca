@@ -6,6 +6,7 @@ import Home from "./components/ui/home";
 import Pool from "./components/ui/pool";
 import { RREF } from "./components/ui/rref";
 import { PDF } from "./components/ui/pdf";
+import { Choreo } from "./components/ui/choreo";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="pool" element={<Pool />} />
           <Route path="rref" element={<RREF />} />
           <Route path="pdf" element={<PDF />} />
+          <Route path="choreo" element={<Choreo />} />
         </Route>
       </Routes>
     </ThemeProvider>
