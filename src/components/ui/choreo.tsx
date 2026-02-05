@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { Pokedex } from './pokedex';
+import fieldImage from '../../assets/field.svg';
 
 // ============================================================================
 // Types & Interfaces
@@ -37,10 +38,11 @@ interface TrajFile {
 // ============================================================================
 
 const FIELD_LENGTH_M = 16.54;
-const FIELD_WIDTH_M = 8.21;
+const FIELD_WIDTH_M = 8.07;
 const SCALE = 100; // 1 meter = 100 SVG units
 const SVG_WIDTH = FIELD_LENGTH_M * SCALE; // 1654
-const SVG_HEIGHT = FIELD_WIDTH_M * SCALE; // 821
+const SVG_HEIGHT = FIELD_WIDTH_M * SCALE; // 807
+const FIELD_IMAGE_SCALE = 1.0; // Scale field image from center
 
 const ROBOT_SIZE_M = 0.75;
 const ROBOT_SIZE_SVG = ROBOT_SIZE_M * SCALE; // 75
@@ -325,10 +327,30 @@ const FieldGrid: React.FC<FieldGridProps> = ({ showGrid = true }) => {
         );
     }
 
+    // Field image dimensions from SVG viewBox (-0.5 -0.5 17.541 9.0692)
+    // The image has a ~0.5m border around the 16.54x8.07m field
+    const FIELD_SVG_WIDTH_M = 17.541;
+    const FIELD_SVG_HEIGHT_M = 9.0692;
+
+    const imgWidth = FIELD_SVG_WIDTH_M * SCALE * FIELD_IMAGE_SCALE;
+    const imgHeight = FIELD_SVG_HEIGHT_M * SCALE * FIELD_IMAGE_SCALE;
+
+    // Center the image on the canvas
+    const imgX = (SVG_WIDTH - imgWidth) / 2;
+    const imgY = (SVG_HEIGHT - imgHeight) / 2;
+
     return (
         <>
             {/* Field background */}
-            <rect x={0} y={0} width={SVG_WIDTH} height={SVG_HEIGHT} fill="#5a5a5a" />
+            <image
+                href={fieldImage}
+                x={imgX}
+                y={imgY}
+                width={imgWidth}
+                height={imgHeight}
+                preserveAspectRatio="none"
+            />
+
             {gridLines}
             {/* Alliance station indicators */}
             <rect x={0} y={0} width={30} height={SVG_HEIGHT} fill="#3366cc" opacity={0.3} />
