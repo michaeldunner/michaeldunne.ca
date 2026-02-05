@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useMemo } from 'react';
+import { Pokedex } from './pokedex';
 
 // ============================================================================
 // Types & Interfaces
@@ -593,233 +594,237 @@ const ChoreoOverlayPage: React.FC = () => {
     }, [isPlaying, animate]);
 
     return (
-        <div
-            style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '16px',
-                padding: '20px',
-                backgroundColor: '#1a1a1a',
-                minHeight: '100vh',
-                fontFamily: 'system-ui, -apple-system, sans-serif',
-            }}
-        >
-            {/* Header */}
+        <Pokedex>
             <div
                 style={{
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap',
-                    gap: '12px',
+                    flexDirection: 'column',
+                    gap: '16px',
+                    padding: '80px 20px 20px 20px',
+                    backgroundColor: '#1a1a1a',
+                    width: '100%',
+                    height: '100%',
+                    minHeight: '80vh',
+                    fontFamily: 'system-ui, -apple-system, sans-serif',
                 }}
             >
-                <h1 style={{ color: '#fff', margin: 0, fontSize: '24px' }}>Choreo Trajectory Visualizer</h1>
+                {/* Header */}
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        gap: '12px',
+                    }}
+                >
+                    <h1 style={{ color: '#fff', margin: 0, fontSize: '24px' }}>Choreo Trajectory Visualizer</h1>
 
-                <div style={{ display: 'flex', gap: '8px' }}>
-                    <label
-                        style={{
-                            padding: '8px 16px',
-                            backgroundColor: '#4a9eff',
-                            color: '#fff',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '14px',
-                        }}
-                    >
-                        Upload .traj files
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            multiple
-                            accept=".traj,.json"
-                            onChange={handleFileUpload}
-                            style={{ display: 'none' }}
-                        />
-                    </label>
-
-                    {trajectories.length > 0 && (
-                        <button
-                            onClick={handleClearAll}
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <label
                             style={{
                                 padding: '8px 16px',
-                                backgroundColor: '#cc3333',
+                                backgroundColor: '#4a9eff',
                                 color: '#fff',
-                                border: 'none',
                                 borderRadius: '4px',
                                 cursor: 'pointer',
                                 fontSize: '14px',
                             }}
                         >
-                            Clear All
-                        </button>
-                    )}
-                </div>
-            </div>
-
-            {/* Error messages */}
-            {errors.length > 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    {errors.map((error, index) => (
-                        <div
-                            key={index}
-                            style={{
-                                padding: '8px 12px',
-                                backgroundColor: '#cc3333',
-                                color: '#fff',
-                                borderRadius: '4px',
-                                fontSize: '13px',
-                            }}
-                        >
-                            {error}
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {/* Time Scrubber */}
-            {trajectories.length > 0 && maxTime > 0 && (
-                <div
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        padding: '12px 16px',
-                        backgroundColor: '#2a2a2a',
-                        borderRadius: '6px',
-                    }}
-                >
-                    <button
-                        onClick={togglePlay}
-                        style={{
-                            width: '32px',
-                            height: '32px',
-                            borderRadius: '50%',
-                            border: 'none',
-                            backgroundColor: isPlaying ? '#cc3333' : '#4daf4a',
-                            color: '#fff',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '14px',
-                            padding: 0,
-                        }}
-                        title={isPlaying ? "Pause" : "Play"}
-                    >
-                        {isPlaying ? '⏸' : '▶'}
-                    </button>
-                    <span style={{ color: '#fff', fontSize: '14px', minWidth: '80px' }}>
-                        Time: {currentTime.toFixed(2)}s
-                    </span>
-                    <input
-                        type="range"
-                        min={0}
-                        max={maxTime}
-                        step={0.02}
-                        value={currentTime}
-                        onChange={handleTimeChange}
-                        style={{
-                            flex: 1,
-                            height: '8px',
-                            cursor: 'pointer',
-                        }}
-                    />
-                    <span style={{ color: '#888', fontSize: '13px' }}>/ {maxTime.toFixed(2)}s</span>
-                </div>
-            )}
-
-            {/* Main content area */}
-            <div
-                style={{
-                    display: 'flex',
-                    gap: '16px',
-                    flexWrap: 'wrap',
-                }}
-            >
-                {/* Field visualization */}
-                <div
-                    style={{
-                        flex: '1 1 800px',
-                        backgroundColor: '#2a2a2a',
-                        borderRadius: '8px',
-                        padding: '12px',
-                        overflow: 'hidden',
-                    }}
-                >
-                    {trajectories.length === 0 ? (
-                        <div
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                height: '400px',
-                                color: '#888',
-                                fontSize: '16px',
-                            }}
-                        >
-                            No trajectories loaded. Upload .traj files to visualize.
-                        </div>
-                    ) : (
-                        <svg
-                            viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
-                            style={{
-                                width: '100%',
-                                height: 'auto',
-                                maxHeight: '70vh',
-                            }}
-                            preserveAspectRatio="xMidYMid meet"
-                        >
-                            {/* Field background and grid */}
-                            <FieldGrid showGrid={true} />
-
-                            {/* Trajectory paths */}
-                            {trajectories.map((trajectory) => (
-                                <TrajectoryPath key={`path-${trajectory.id}`} trajectory={trajectory} />
-                            ))}
-
-                            {/* Robot visualizations at current time */}
-                            {trajectories.map((trajectory) => {
-                                const pose = getPoseAtTime(trajectory.samples, currentTime);
-                                return (
-                                    <RobotVisualization key={`robot-${trajectory.id}`} pose={pose} color={trajectory.color} />
-                                );
-                            })}
-                        </svg>
-                    )}
-                </div>
-
-                {/* Legend / Trajectory list */}
-                {trajectories.length > 0 && (
-                    <div
-                        style={{
-                            flex: '0 0 280px',
-                            backgroundColor: '#2a2a2a',
-                            borderRadius: '8px',
-                            padding: '12px',
-                            maxHeight: '70vh',
-                            overflowY: 'auto',
-                        }}
-                    >
-                        <h3 style={{ color: '#fff', margin: '0 0 12px 0', fontSize: '16px' }}>Trajectories</h3>
-                        {trajectories.map((trajectory) => (
-                            <LegendItem
-                                key={trajectory.id}
-                                trajectory={trajectory}
-                                onAllianceChange={handleAllianceChange}
-                                onRemove={handleRemove}
+                            Upload .traj files
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                multiple
+                                accept=".traj,.json"
+                                onChange={handleFileUpload}
+                                style={{ display: 'none' }}
                             />
+                        </label>
+
+                        {trajectories.length > 0 && (
+                            <button
+                                onClick={handleClearAll}
+                                style={{
+                                    padding: '8px 16px',
+                                    backgroundColor: '#cc3333',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    fontSize: '14px',
+                                }}
+                            >
+                                Clear All
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                {/* Error messages */}
+                {errors.length > 0 && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        {errors.map((error, index) => (
+                            <div
+                                key={index}
+                                style={{
+                                    padding: '8px 12px',
+                                    backgroundColor: '#cc3333',
+                                    color: '#fff',
+                                    borderRadius: '4px',
+                                    fontSize: '13px',
+                                }}
+                            >
+                                {error}
+                            </div>
                         ))}
                     </div>
                 )}
-            </div>
 
-            {/* Info footer */}
-            <div style={{ color: '#666', fontSize: '12px', textAlign: 'center' }}>
-                Field: {FIELD_LENGTH_M}m × {FIELD_WIDTH_M}m | Robot: {ROBOT_SIZE_M}m × {ROBOT_SIZE_M}m | Blue
-                Alliance origin at bottom-left
+                {/* Time Scrubber */}
+                {trajectories.length > 0 && maxTime > 0 && (
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            padding: '12px 16px',
+                            backgroundColor: '#2a2a2a',
+                            borderRadius: '6px',
+                        }}
+                    >
+                        <button
+                            onClick={togglePlay}
+                            style={{
+                                width: '32px',
+                                height: '32px',
+                                borderRadius: '50%',
+                                border: 'none',
+                                backgroundColor: isPlaying ? '#cc3333' : '#4daf4a',
+                                color: '#fff',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '14px',
+                                padding: 0,
+                            }}
+                            title={isPlaying ? "Pause" : "Play"}
+                        >
+                            {isPlaying ? '⏸' : '▶'}
+                        </button>
+                        <span style={{ color: '#fff', fontSize: '14px', minWidth: '80px' }}>
+                            Time: {currentTime.toFixed(2)}s
+                        </span>
+                        <input
+                            type="range"
+                            min={0}
+                            max={maxTime}
+                            step={0.02}
+                            value={currentTime}
+                            onChange={handleTimeChange}
+                            style={{
+                                flex: 1,
+                                height: '8px',
+                                cursor: 'pointer',
+                            }}
+                        />
+                        <span style={{ color: '#888', fontSize: '13px' }}>/ {maxTime.toFixed(2)}s</span>
+                    </div>
+                )}
+
+                {/* Main content area */}
+                <div
+                    style={{
+                        display: 'flex',
+                        gap: '16px',
+                        flexWrap: 'wrap',
+                    }}
+                >
+                    {/* Field visualization */}
+                    <div
+                        style={{
+                            flex: '1 1 400px',
+                            backgroundColor: '#2a2a2a',
+                            borderRadius: '8px',
+                            padding: '12px',
+                            overflow: 'hidden',
+                        }}
+                    >
+                        {trajectories.length === 0 ? (
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    height: '400px',
+                                    color: '#888',
+                                    fontSize: '16px',
+                                }}
+                            >
+                                No trajectories loaded. Upload .traj files to visualize.
+                            </div>
+                        ) : (
+                            <svg
+                                viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
+                                style={{
+                                    width: '100%',
+                                    height: 'auto',
+                                    maxHeight: '70vh',
+                                }}
+                                preserveAspectRatio="xMidYMid meet"
+                            >
+                                {/* Field background and grid */}
+                                <FieldGrid showGrid={true} />
+
+                                {/* Trajectory paths */}
+                                {trajectories.map((trajectory) => (
+                                    <TrajectoryPath key={`path-${trajectory.id}`} trajectory={trajectory} />
+                                ))}
+
+                                {/* Robot visualizations at current time */}
+                                {trajectories.map((trajectory) => {
+                                    const pose = getPoseAtTime(trajectory.samples, currentTime);
+                                    return (
+                                        <RobotVisualization key={`robot-${trajectory.id}`} pose={pose} color={trajectory.color} />
+                                    );
+                                })}
+                            </svg>
+                        )}
+                    </div>
+
+                    {/* Legend / Trajectory list */}
+                    {trajectories.length > 0 && (
+                        <div
+                            style={{
+                                flex: '0 0 280px',
+                                backgroundColor: '#2a2a2a',
+                                borderRadius: '8px',
+                                padding: '12px',
+                                maxHeight: '70vh',
+                                overflowY: 'auto',
+                            }}
+                        >
+                            <h3 style={{ color: '#fff', margin: '0 0 12px 0', fontSize: '16px' }}>Trajectories</h3>
+                            {trajectories.map((trajectory) => (
+                                <LegendItem
+                                    key={trajectory.id}
+                                    trajectory={trajectory}
+                                    onAllianceChange={handleAllianceChange}
+                                    onRemove={handleRemove}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Info footer */}
+                <div style={{ color: '#666', fontSize: '12px', textAlign: 'center' }}>
+                    Field: {FIELD_LENGTH_M}m × {FIELD_WIDTH_M}m | Robot: {ROBOT_SIZE_M}m × {ROBOT_SIZE_M}m | Blue
+                    Alliance origin at bottom-left
+                </div>
             </div>
-        </div>
+        </Pokedex>
     );
 };
 
