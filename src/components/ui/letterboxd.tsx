@@ -64,7 +64,7 @@ export function LetterboxdCard() {
   useEffect(() => {
     if (hasItem && imageURL) {
       fac
-        .getColorAsync(imageURL)
+        .getColorAsync(`https://wsrv.nl/?url=${imageURL}&w=100`)
         .then((color) => {
           setBgColor(color.hex);
         })
