@@ -272,6 +272,9 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
           >
             {/* Top-Left: Editor Section */}
             <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ type: "spring", stiffness: 260, damping: 20 }}
               className={`p-8 pt-24 md:p-8 md:pt-32 bg-neutral-100 dark:bg-neutral-800 flex flex-col gap-6 border-b md:border-b-0 border-neutral-300 dark:border-neutral-700 md:overflow-hidden relative z-0 ${!isFocusMode ? 'md:border-r' : ''}`}
             >
               <div className="flex flex-col">
@@ -413,7 +416,7 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
                 layout="position"
                 initial={{ x: 20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
+                transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.2 }}
               >
                 <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-red-400 mb-2">
                   {title}
@@ -435,10 +438,10 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
           {/* Bottom Row: Full-width Code Block Section (Always visible) */}
           <div className="w-full p-8 md:p-12 bg-neutral-100 dark:bg-neutral-800 border-t border-neutral-300 dark:border-neutral-700">
             <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="border-l-4 border-red-500 pl-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ type: "spring", stiffness: 260, damping: 20 }}
+              className="w-full h-full p-4 md:p-8"
             >
               <h4 className="font-bold text-neutral-900 dark:text-white mb-4">
                 Source Code (C++)

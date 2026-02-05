@@ -58,8 +58,13 @@ export function Article({
   return (
     <div className="min-h-screen w-full bg-white dark:bg-neutral-950 p-4 md:p-8">
       <Pokedex>
-        {/* Left Col: Visuals (Sticky on Desktop) */}
-        <div className="md:w-1/2 p-8 pt-24 bg-neutral-100 dark:bg-neutral-800 flex flex-col gap-6 border-b md:border-b-0 md:border-r border-neutral-300 dark:border-neutral-700">
+        {/* Left Column: Visualizer & Timeline */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ type: "spring", stiffness: 260, damping: 20 }}
+          className="p-6 pt-24 md:p-8 md:pt-32 bg-neutral-100 dark:bg-neutral-800 flex flex-col gap-6 border-b md:border-b-0 md:border-r border-neutral-300 dark:border-neutral-700 relative"
+        >
           <div className="max-w-[650px] mx-auto w-full">
             <ImageSlideshow
               images={images}
@@ -79,14 +84,15 @@ export function Article({
               ))}
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Right Col: Content */}
         <div className="md:w-1/2 p-8 pt-24 md:p-12 md:pt-24">
           <motion.div
-            initial={{ x: 20, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+            className="w-full h-full p-4 md:p-8"
           >
             <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-red-400 mb-2">
               {title}

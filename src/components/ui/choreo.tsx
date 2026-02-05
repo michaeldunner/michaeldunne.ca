@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
+import { motion } from "motion/react";
 import { Pokedex } from './pokedex';
 import fieldImage from '../../assets/field.svg';
 import { cn } from "../../lib/utils";
@@ -588,18 +589,15 @@ const ChoreoOverlayPage: React.FC = () => {
         <div className="min-h-screen w-full bg-white dark:bg-neutral-950 p-4 md:p-8">
             <Pokedex>
                 <div className="flex flex-col w-full">
-                    {/* Header Row - Simplified since Pokedex provides the frame */}
-                    <div className="hidden">
-                        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-red-400">
-                            Choreo Trajectory Visualizer
-                        </h1>
-                    </div>
-
                     {/* Main Split View */}
                     <div className="grid grid-cols-1 md:grid-cols-[2.5fr_1fr] items-stretch w-full border-b border-neutral-300 dark:border-neutral-700 h-auto">
-
                         {/* Left Column: Visualizer & Timeline */}
-                        <div className="p-6 pt-24 md:p-8 md:pt-32 bg-neutral-100 dark:bg-neutral-800 flex flex-col gap-6 border-b md:border-b-0 md:border-r border-neutral-300 dark:border-neutral-700 relative">
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                            className="p-6 pt-24 md:p-8 md:pt-32 bg-neutral-100 dark:bg-neutral-800 flex flex-col gap-6 border-b md:border-b-0 md:border-r border-neutral-300 dark:border-neutral-700 relative"
+                        >
                             <div className="flex-1 bg-white dark:bg-neutral-900/50 rounded-2xl border border-neutral-200 dark:border-neutral-700 p-4 shadow-xl overflow-hidden flex items-center justify-center min-h-[400px] md:min-h-[600px]">
                                 <svg
                                     viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
@@ -650,10 +648,15 @@ const ChoreoOverlayPage: React.FC = () => {
                                     />
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
 
                         {/* Right Column: Controls & Legend */}
-                        <div className="p-8 pt-12 md:p-12 md:pt-32 bg-white dark:bg-neutral-900 flex flex-col gap-8 overflow-y-auto">
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.1 }}
+                            className="p-8 pt-12 md:p-12 md:pt-32 bg-white dark:bg-neutral-900 flex flex-col gap-8 overflow-y-auto"
+                        >
                             <div>
                                 <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-red-400 mb-2 leading-tight">
                                     Trajectory Visualizer
@@ -723,7 +726,7 @@ const ChoreoOverlayPage: React.FC = () => {
                                     </div>
                                 )}
                             </div>
-                        </div>
+                        </motion.div>
                     </div>
                 </div>
             </Pokedex>
