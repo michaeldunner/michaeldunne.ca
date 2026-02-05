@@ -681,57 +681,59 @@ const ChoreoOverlayPage: React.FC = () => {
                     </div>
                 )}
 
-                {/* Time Scrubber */}
-                {trajectories.length > 0 && maxTime > 0 && (
-                    <div
+                {/* Time Scrubber - Always rendered to reserve space */}
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        padding: '12px 16px',
+                        backgroundColor: '#2a2a2a',
+                        borderRadius: '6px',
+                        opacity: trajectories.length > 0 ? 1 : 0.5,
+                        pointerEvents: trajectories.length > 0 ? 'auto' : 'none',
+                    }}
+                >
+                    <button
+                        onClick={togglePlay}
+                        disabled={trajectories.length === 0}
                         style={{
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '50%',
+                            border: 'none',
+                            backgroundColor: isPlaying ? '#cc3333' : '#4daf4a',
+                            color: '#fff',
+                            cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '12px',
-                            padding: '12px 16px',
-                            backgroundColor: '#2a2a2a',
-                            borderRadius: '6px',
+                            justifyContent: 'center',
+                            fontSize: '14px',
+                            padding: 0,
                         }}
+                        title={isPlaying ? "Pause" : "Play"}
                     >
-                        <button
-                            onClick={togglePlay}
-                            style={{
-                                width: '32px',
-                                height: '32px',
-                                borderRadius: '50%',
-                                border: 'none',
-                                backgroundColor: isPlaying ? '#cc3333' : '#4daf4a',
-                                color: '#fff',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: '14px',
-                                padding: 0,
-                            }}
-                            title={isPlaying ? "Pause" : "Play"}
-                        >
-                            {isPlaying ? '⏸' : '▶'}
-                        </button>
-                        <span style={{ color: '#fff', fontSize: '14px', minWidth: '80px' }}>
-                            Time: {currentTime.toFixed(2)}s
-                        </span>
-                        <input
-                            type="range"
-                            min={0}
-                            max={maxTime}
-                            step={0.02}
-                            value={currentTime}
-                            onChange={handleTimeChange}
-                            style={{
-                                flex: 1,
-                                height: '8px',
-                                cursor: 'pointer',
-                            }}
-                        />
-                        <span style={{ color: '#888', fontSize: '13px' }}>/ {maxTime.toFixed(2)}s</span>
-                    </div>
-                )}
+                        {isPlaying ? '⏸' : '▶'}
+                    </button>
+                    <span style={{ color: '#fff', fontSize: '14px', minWidth: '80px' }}>
+                        Time: {currentTime.toFixed(2)}s
+                    </span>
+                    <input
+                        type="range"
+                        min={0}
+                        max={maxTime || 10} // Default max for visual appearance if empty
+                        step={0.02}
+                        value={currentTime}
+                        onChange={handleTimeChange}
+                        disabled={trajectories.length === 0}
+                        style={{
+                            flex: 1,
+                            height: '8px',
+                            cursor: 'pointer',
+                        }}
+                    />
+                    <span style={{ color: '#888', fontSize: '13px' }}>/ {maxTime.toFixed(2)}s</span>
+                </div>
 
                 {/* Main content area */}
                 <div
@@ -752,18 +754,28 @@ const ChoreoOverlayPage: React.FC = () => {
                         }}
                     >
                         {trajectories.length === 0 ? (
-                            <div
+                            <svg
+                                viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
                                 style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    height: '400px',
-                                    color: '#888',
-                                    fontSize: '16px',
+                                    width: '100%',
+                                    height: 'auto',
+                                    maxHeight: '70vh',
                                 }}
+                                preserveAspectRatio="xMidYMid meet"
                             >
-                                No trajectories loaded. Upload .traj files to visualize.
-                            </div>
+                                <FieldGrid showGrid={false} />
+                                <text
+                                    x={SVG_WIDTH / 2}
+                                    y={SVG_HEIGHT / 2}
+                                    textAnchor="middle"
+                                    dominantBaseline="middle"
+                                    fill="#888"
+                                    fontSize="40"
+                                    fontFamily="system-ui"
+                                >
+                                    No trajectories loaded. Upload .traj files to visualize.
+                                </text>
+                            </svg>
                         ) : (
                             <svg
                                 viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
@@ -794,28 +806,34 @@ const ChoreoOverlayPage: React.FC = () => {
                     </div>
 
                     {/* Legend / Trajectory list */}
-                    {trajectories.length > 0 && (
-                        <div
-                            style={{
-                                flex: '0 0 280px',
-                                backgroundColor: '#2a2a2a',
-                                borderRadius: '8px',
-                                padding: '12px',
-                                maxHeight: '70vh',
-                                overflowY: 'auto',
-                            }}
-                        >
-                            <h3 style={{ color: '#fff', margin: '0 0 12px 0', fontSize: '16px' }}>Trajectories</h3>
-                            {trajectories.map((trajectory) => (
-                                <LegendItem
-                                    key={trajectory.id}
-                                    trajectory={trajectory}
-                                    onAllianceChange={handleAllianceChange}
-                                    onRemove={handleRemove}
-                                />
-                            ))}
-                        </div>
-                    )}
+                    <div
+                        style={{
+                            flex: '0 0 280px',
+                            backgroundColor: '#2a2a2a',
+                            borderRadius: '8px',
+                            padding: '12px',
+                            maxHeight: '70vh',
+                            overflowY: 'auto',
+                        }}
+                    >
+                        {trajectories.length > 0 ? (
+                            <>
+                                <h3 style={{ color: '#fff', margin: '0 0 12px 0', fontSize: '16px' }}>Trajectories</h3>
+                                {trajectories.map((trajectory) => (
+                                    <LegendItem
+                                        key={trajectory.id}
+                                        trajectory={trajectory}
+                                        onAllianceChange={handleAllianceChange}
+                                        onRemove={handleRemove}
+                                    />
+                                ))}
+                            </>
+                        ) : (
+                            <div style={{ color: '#666', fontSize: '14px', textAlign: 'center', marginTop: '20px' }}>
+                                Upload trajectories to see them listed here.
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Info footer */}
