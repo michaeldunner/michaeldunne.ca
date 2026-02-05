@@ -1,6 +1,8 @@
-import React, { useState, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { Pokedex } from './pokedex';
 import fieldImage from '../../assets/field.svg';
+import { cn } from "../../lib/utils";
+import { IconX, IconPlayerPlayFilled, IconPlayerPauseFilled } from "@tabler/icons-react";
 
 // ============================================================================
 // Types & Interfaces
@@ -42,7 +44,7 @@ const FIELD_WIDTH_M = 8.07;
 const SCALE = 100; // 1 meter = 100 SVG units
 const SVG_WIDTH = FIELD_LENGTH_M * SCALE; // 1654
 const SVG_HEIGHT = FIELD_WIDTH_M * SCALE; // 807
-const FIELD_IMAGE_SCALE = 1.0; // Scale field image from center
+const FIELD_IMAGE_SCALE = 0.995; // Scale field image from center
 
 const ROBOT_SIZE_M = 0.75;
 const ROBOT_SIZE_SVG = ROBOT_SIZE_M * SCALE; // 75
@@ -274,57 +276,57 @@ interface FieldGridProps {
     showGrid?: boolean;
 }
 
-const FieldGrid: React.FC<FieldGridProps> = ({ showGrid = true }) => {
+const FieldGrid: React.FC<FieldGridProps> = ({ showGrid = false }) => {
     const gridLines: React.ReactNode[] = [];
 
     if (showGrid) {
         // Vertical lines (every 1 meter)
-        for (let x = 0; x <= FIELD_LENGTH_M; x++) {
-            const { svgX } = metersToSvg(x, 0);
-            gridLines.push(
-                <line
-                    key={`v-${x}`}
-                    x1={svgX}
-                    y1={0}
-                    x2={svgX}
-                    y2={SVG_HEIGHT}
-                    stroke="#666"
-                    strokeWidth={1}
-                    strokeOpacity={0.3}
-                />
-            );
-        }
+        // for (let x = 0; x <= FIELD_LENGTH_M; x++) {
+        //     const { svgX } = metersToSvg(x, 0);
+        //     gridLines.push(
+        //         <line
+        //             key={`v-${x}`}
+        //             x1={svgX}
+        //             y1={0}
+        //             x2={svgX}
+        //             y2={SVG_HEIGHT}
+        //             stroke="#666"
+        //             strokeWidth={1}
+        //             strokeOpacity={0.3}
+        //         />
+        //     );
+        // }
 
-        // Horizontal lines (every 1 meter)
-        for (let y = 0; y <= FIELD_WIDTH_M; y++) {
-            const { svgY } = metersToSvg(0, y);
-            gridLines.push(
-                <line
-                    key={`h-${y}`}
-                    x1={0}
-                    y1={svgY}
-                    x2={SVG_WIDTH}
-                    y2={svgY}
-                    stroke="#666"
-                    strokeWidth={1}
-                    strokeOpacity={0.3}
-                />
-            );
-        }
+        // // Horizontal lines (every 1 meter)
+        // for (let y = 0; y <= FIELD_WIDTH_M; y++) {
+        //     const { svgY } = metersToSvg(0, y);
+        //     gridLines.push(
+        //         <line
+        //             key={`h-${y}`}
+        //             x1={0}
+        //             y1={svgY}
+        //             x2={SVG_WIDTH}
+        //             y2={svgY}
+        //             stroke="#666"
+        //             strokeWidth={1}
+        //             strokeOpacity={0.3}
+        //         />
+        //     );
+        // }
 
         // Center line
-        gridLines.push(
-            <line
-                key="center"
-                x1={SVG_WIDTH / 2}
-                y1={0}
-                x2={SVG_WIDTH / 2}
-                y2={SVG_HEIGHT}
-                stroke="#fff"
-                strokeWidth={2}
-                strokeOpacity={0.5}
-            />
-        );
+        // gridLines.push(
+        //     <line
+        //         key="center"
+        //         x1={SVG_WIDTH / 2}
+        //         y1={0}
+        //         x2={SVG_WIDTH / 2}
+        //         y2={SVG_HEIGHT}
+        //         stroke="#fff"
+        //         strokeWidth={2}
+        //         strokeOpacity={0.5}
+        //     />
+        // );
     }
 
     // Field image dimensions from SVG viewBox (-0.5 -0.5 17.541 9.0692)
@@ -353,8 +355,8 @@ const FieldGrid: React.FC<FieldGridProps> = ({ showGrid = true }) => {
 
             {gridLines}
             {/* Alliance station indicators */}
-            <rect x={0} y={0} width={30} height={SVG_HEIGHT} fill="#3366cc" opacity={0.3} />
-            <rect x={SVG_WIDTH - 30} y={0} width={30} height={SVG_HEIGHT} fill="#cc3333" opacity={0.3} />
+            {/* <rect x={0} y={0} width={30} height={SVG_HEIGHT} fill="#3366cc" opacity={0.3} />
+            <rect x={SVG_WIDTH - 30} y={0} width={30} height={SVG_HEIGHT} fill="#cc3333" opacity={0.3} /> */}
         </>
     );
 };
@@ -367,38 +369,16 @@ interface LegendItemProps {
 
 const LegendItem: React.FC<LegendItemProps> = ({ trajectory, onAllianceChange, onRemove }) => {
     return (
-        <div
-            style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '6px 10px',
-                backgroundColor: '#2a2a2a',
-                borderRadius: '4px',
-                marginBottom: '4px',
-            }}
-        >
+        <div className="flex items-center gap-3 p-3 bg-neutral-50 dark:bg-neutral-800/80 border border-neutral-100 dark:border-neutral-700/50 rounded-xl shadow-sm hover:shadow-md transition-all group">
             {/* Color swatch */}
             <div
-                style={{
-                    width: '16px',
-                    height: '16px',
-                    backgroundColor: trajectory.color,
-                    borderRadius: '3px',
-                    flexShrink: 0,
-                }}
+                className="w-4 h-4 rounded-md flex-shrink-0 shadow-inner"
+                style={{ backgroundColor: trajectory.color }}
             />
 
             {/* Filename */}
             <span
-                style={{
-                    flex: 1,
-                    color: '#fff',
-                    fontSize: '13px',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                }}
+                className="flex-1 text-neutral-900 dark:text-neutral-200 text-xs font-semibold truncate"
                 title={trajectory.filename}
             >
                 {trajectory.filename}
@@ -407,36 +387,25 @@ const LegendItem: React.FC<LegendItemProps> = ({ trajectory, onAllianceChange, o
             {/* Alliance dropdown */}
             <select
                 value={trajectory.alliance}
-                onChange={(e) => onAllianceChange(trajectory.id, e.target.value as 'blue' | 'red')}
-                style={{
-                    padding: '4px 8px',
-                    backgroundColor: trajectory.alliance === 'blue' ? '#3366cc' : '#cc3333',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '3px',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                }}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => onAllianceChange(trajectory.id, e.target.value as 'blue' | 'red')}
+                className={cn(
+                    "px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-lg border-none cursor-pointer outline-none transition-all shadow-sm",
+                    trajectory.alliance === 'blue'
+                        ? "bg-blue-600 text-white hover:bg-blue-700"
+                        : "bg-red-600 text-white hover:bg-red-700"
+                )}
             >
-                <option value="blue">Blue Alliance</option>
-                <option value="red">Red Alliance</option>
+                <option value="blue" className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">Blue</option>
+                <option value="red" className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">Red</option>
             </select>
 
             {/* Remove button */}
             <button
                 onClick={() => onRemove(trajectory.id)}
-                style={{
-                    padding: '4px 8px',
-                    backgroundColor: '#555',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '3px',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                }}
+                className="w-6 h-6 flex items-center justify-center text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-all"
                 title="Remove trajectory"
             >
-                ✕
+                <IconX size={14} />
             </button>
         </div>
     );
@@ -460,7 +429,7 @@ const ChoreoOverlayPage: React.FC = () => {
     const maxTime = useMemo(() => {
         if (trajectories.length === 0) return 0;
         return Math.max(
-            ...trajectories.map((t) => {
+            ...trajectories.map((t: Trajectory) => {
                 if (t.samples.length === 0) return 0;
                 return t.samples[t.samples.length - 1].t;
             })
@@ -535,7 +504,7 @@ const ChoreoOverlayPage: React.FC = () => {
     // Handle alliance change
     const handleAllianceChange = useCallback((id: string, alliance: 'blue' | 'red') => {
         setTrajectories((prev) =>
-            prev.map((t) => {
+            prev.map((t: Trajectory) => {
                 if (t.id !== id) return t;
                 return {
                     ...t,
@@ -604,7 +573,7 @@ const ChoreoOverlayPage: React.FC = () => {
     }, [currentTime, maxTime]);
 
     // Effect for animation
-    React.useEffect(() => {
+    useEffect(() => {
         if (isPlaying) {
             lastFrameTimeRef.current = performance.now();
             requestRef.current = requestAnimationFrame(animate);
@@ -616,255 +585,162 @@ const ChoreoOverlayPage: React.FC = () => {
     }, [isPlaying, animate]);
 
     return (
-        <Pokedex>
-            <div
-                style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '16px',
-                    padding: '80px 20px 20px 20px',
-                    backgroundColor: '#1a1a1a',
-                    width: '100%',
-                    height: '100%',
-                    minHeight: '80vh',
-                    fontFamily: 'system-ui, -apple-system, sans-serif',
-                }}
-            >
-                {/* Header */}
-                <div
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        flexWrap: 'wrap',
-                        gap: '12px',
-                    }}
-                >
-                    <h1 style={{ color: '#fff', margin: 0, fontSize: '24px' }}>Choreo Trajectory Visualizer</h1>
-
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                        <label
-                            style={{
-                                padding: '8px 16px',
-                                backgroundColor: '#4a9eff',
-                                color: '#fff',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                fontSize: '14px',
-                            }}
-                        >
-                            Upload .traj files
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                multiple
-                                accept=".traj,.json"
-                                onChange={handleFileUpload}
-                                style={{ display: 'none' }}
-                            />
-                        </label>
-
-                        {trajectories.length > 0 && (
-                            <button
-                                onClick={handleClearAll}
-                                style={{
-                                    padding: '8px 16px',
-                                    backgroundColor: '#cc3333',
-                                    color: '#fff',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    fontSize: '14px',
-                                }}
-                            >
-                                Clear All
-                            </button>
-                        )}
+        <div className="md:h-full min-h-screen w-full bg-white dark:bg-neutral-950 p-4 md:p-8 overflow-y-auto">
+            <Pokedex>
+                <div className="flex flex-col w-full">
+                    {/* Header Row - Simplified since Pokedex provides the frame */}
+                    <div className="hidden">
+                        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-red-400">
+                            Choreo Trajectory Visualizer
+                        </h1>
                     </div>
-                </div>
 
-                {/* Error messages */}
-                {errors.length > 0 && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        {errors.map((error, index) => (
-                            <div
-                                key={index}
-                                style={{
-                                    padding: '8px 12px',
-                                    backgroundColor: '#cc3333',
-                                    color: '#fff',
-                                    borderRadius: '4px',
-                                    fontSize: '13px',
-                                }}
-                            >
-                                {error}
-                            </div>
-                        ))}
-                    </div>
-                )}
+                    {/* Main Split View */}
+                    <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr] items-stretch w-full border-b border-neutral-300 dark:border-neutral-700 md:h-[800px] h-auto overflow-hidden">
 
-                {/* Time Scrubber - Always rendered to reserve space */}
-                <div
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        padding: '12px 16px',
-                        backgroundColor: '#2a2a2a',
-                        borderRadius: '6px',
-                        opacity: trajectories.length > 0 ? 1 : 0.5,
-                        pointerEvents: trajectories.length > 0 ? 'auto' : 'none',
-                    }}
-                >
-                    <button
-                        onClick={togglePlay}
-                        disabled={trajectories.length === 0}
-                        style={{
-                            width: '32px',
-                            height: '32px',
-                            borderRadius: '50%',
-                            border: 'none',
-                            backgroundColor: isPlaying ? '#cc3333' : '#4daf4a',
-                            color: '#fff',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '14px',
-                            padding: 0,
-                        }}
-                        title={isPlaying ? "Pause" : "Play"}
-                    >
-                        {isPlaying ? '⏸' : '▶'}
-                    </button>
-                    <span style={{ color: '#fff', fontSize: '14px', minWidth: '80px' }}>
-                        Time: {currentTime.toFixed(2)}s
-                    </span>
-                    <input
-                        type="range"
-                        min={0}
-                        max={maxTime || 10} // Default max for visual appearance if empty
-                        step={0.02}
-                        value={currentTime}
-                        onChange={handleTimeChange}
-                        disabled={trajectories.length === 0}
-                        style={{
-                            flex: 1,
-                            height: '8px',
-                            cursor: 'pointer',
-                        }}
-                    />
-                    <span style={{ color: '#888', fontSize: '13px' }}>/ {maxTime.toFixed(2)}s</span>
-                </div>
-
-                {/* Main content area */}
-                <div
-                    style={{
-                        display: 'flex',
-                        gap: '16px',
-                        flexWrap: 'wrap',
-                    }}
-                >
-                    {/* Field visualization */}
-                    <div
-                        style={{
-                            flex: '1 1 400px',
-                            backgroundColor: '#2a2a2a',
-                            borderRadius: '8px',
-                            padding: '12px',
-                            overflow: 'hidden',
-                        }}
-                    >
-                        {trajectories.length === 0 ? (
-                            <svg
-                                viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
-                                style={{
-                                    width: '100%',
-                                    height: 'auto',
-                                    maxHeight: '70vh',
-                                }}
-                                preserveAspectRatio="xMidYMid meet"
-                            >
-                                <FieldGrid showGrid={false} />
-                                <text
-                                    x={SVG_WIDTH / 2}
-                                    y={SVG_HEIGHT / 2}
-                                    textAnchor="middle"
-                                    dominantBaseline="middle"
-                                    fill="#888"
-                                    fontSize="40"
-                                    fontFamily="system-ui"
+                        {/* Left Column: Visualizer & Timeline */}
+                        <div className="p-6 pt-24 md:p-8 md:pt-32 bg-neutral-100 dark:bg-neutral-800 flex flex-col gap-6 border-b md:border-b-0 md:border-r border-neutral-300 dark:border-neutral-700 overflow-hidden relative">
+                            {/* Field Visualization Container */}
+                            <div className="flex-1 bg-white dark:bg-neutral-900/50 rounded-2xl border border-neutral-200 dark:border-neutral-700 p-4 shadow-xl overflow-hidden flex items-center justify-center">
+                                <svg
+                                    viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
+                                    className="w-full h-auto max-h-full"
+                                    preserveAspectRatio="xMidYMid meet"
                                 >
-                                    No trajectories loaded. Upload .traj files to visualize.
-                                </text>
-                            </svg>
-                        ) : (
-                            <svg
-                                viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
-                                style={{
-                                    width: '100%',
-                                    height: 'auto',
-                                    maxHeight: '70vh',
-                                }}
-                                preserveAspectRatio="xMidYMid meet"
-                            >
-                                {/* Field background and grid */}
-                                <FieldGrid showGrid={true} />
-
-                                {/* Trajectory paths */}
-                                {trajectories.map((trajectory) => (
-                                    <TrajectoryPath key={`path-${trajectory.id}`} trajectory={trajectory} />
-                                ))}
-
-                                {/* Robot visualizations at current time */}
-                                {trajectories.map((trajectory) => {
-                                    const pose = getPoseAtTime(trajectory.samples, currentTime);
-                                    return (
-                                        <RobotVisualization key={`robot-${trajectory.id}`} pose={pose} color={trajectory.color} />
-                                    );
-                                })}
-                            </svg>
-                        )}
-                    </div>
-
-                    {/* Legend / Trajectory list */}
-                    <div
-                        style={{
-                            flex: '0 0 280px',
-                            backgroundColor: '#2a2a2a',
-                            borderRadius: '8px',
-                            padding: '12px',
-                            maxHeight: '70vh',
-                            overflowY: 'auto',
-                        }}
-                    >
-                        {trajectories.length > 0 ? (
-                            <>
-                                <h3 style={{ color: '#fff', margin: '0 0 12px 0', fontSize: '16px' }}>Trajectories</h3>
-                                {trajectories.map((trajectory) => (
-                                    <LegendItem
-                                        key={trajectory.id}
-                                        trajectory={trajectory}
-                                        onAllianceChange={handleAllianceChange}
-                                        onRemove={handleRemove}
-                                    />
-                                ))}
-                            </>
-                        ) : (
-                            <div style={{ color: '#666', fontSize: '14px', textAlign: 'center', marginTop: '20px' }}>
-                                Upload trajectories to see them listed here.
+                                    <FieldGrid showGrid={true} />
+                                    {trajectories.length === 0 && (
+                                        <text
+                                            x={SVG_WIDTH / 2}
+                                            y={SVG_HEIGHT / 2}
+                                            textAnchor="middle"
+                                            dominantBaseline="middle"
+                                            fill="#666"
+                                            className="text-4xl font-sans font-medium"
+                                        >
+                                            No trajectories loaded.
+                                        </text>
+                                    )}
+                                    {trajectories.map((traj: Trajectory) => (
+                                        <TrajectoryPath key={traj.id} trajectory={traj} />
+                                    ))}
+                                    {trajectories.map((traj: Trajectory) => {
+                                        const pose = getPoseAtTime(traj.samples, currentTime);
+                                        return (
+                                            <RobotVisualization
+                                                key={`robot-${traj.id}`}
+                                                pose={pose}
+                                                color={traj.color}
+                                            />
+                                        );
+                                    })}
+                                </svg>
                             </div>
-                        )}
+
+                            {/* Timeline Scrubber Component */}
+                            <div className={`flex items-center gap-4 p-4 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-700 shadow-lg transition-opacity ${trajectories.length > 0 ? 'opacity-100' : 'opacity-50 cursor-not-allowed'}`}>
+                                <button
+                                    onClick={togglePlay}
+                                    disabled={trajectories.length === 0}
+                                    className={`w-10 h-10 rounded-xl flex items-center justify-center text-white transition-all shadow-lg bg-red-600 hover:bg-red-700 shadow-red-500/20 hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:bg-neutral-400 disabled:shadow-none`}
+                                    title={isPlaying ? "Pause" : "Play"}
+                                >
+                                    {isPlaying ? <IconPlayerPauseFilled size={20} /> : <IconPlayerPlayFilled size={20} />}
+                                </button>
+                                <div className="flex flex-col flex-1 gap-1">
+                                    <div className="flex justify-between text-[10px] uppercase font-bold tracking-widest text-neutral-400">
+                                        <span>{currentTime.toFixed(2)}s</span>
+                                        <span>{maxTime.toFixed(2)}s</span>
+                                    </div>
+                                    <input
+                                        type="range"
+                                        min={0}
+                                        max={maxTime || 10}
+                                        step={0.01}
+                                        value={currentTime}
+                                        onChange={handleTimeChange}
+                                        disabled={trajectories.length === 0}
+                                        className="w-full h-2 bg-neutral-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-red-600 disabled:cursor-not-allowed"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right Column: Controls & Legend */}
+                        <div className="p-8 pt-12 md:p-12 md:pt-32 bg-white dark:bg-neutral-900 flex flex-col gap-8 overflow-y-auto">
+                            <div>
+                                <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-red-400 mb-2 leading-tight">
+                                    Trajectory Visualizer
+                                </h1>
+                                <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed mb-6">
+                                    Upload `.traj` files from Choreo to visualize and compare paths across different alliances.
+                                </p>
+
+                                <div className="flex flex-col gap-3">
+                                    <label className="group relative flex items-center justify-center px-6 py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-500/20 cursor-pointer transition-all hover:-translate-y-1 active:scale-95 overflow-hidden">
+                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                                        <span className="relative z-10 flex items-center gap-2">
+                                            UPLOAD TRAJECTORIES
+                                        </span>
+                                        <input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            multiple
+                                            accept=".traj,.json"
+                                            onChange={handleFileUpload}
+                                            className="hidden"
+                                        />
+                                    </label>
+
+                                    {trajectories.length > 0 && (
+                                        <button
+                                            onClick={handleClearAll}
+                                            className="px-6 py-3 border-2 border-neutral-200 dark:border-neutral-800 text-neutral-500 dark:text-neutral-400 font-bold rounded-xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all text-sm uppercase tracking-widest"
+                                        >
+                                            Clear Workspace
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Error Messages */}
+                            {errors.length > 0 && (
+                                <div className="flex flex-col gap-2">
+                                    {errors.map((error: string, index: number) => (
+                                        <div key={index} className="p-3 bg-red-100 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 rounded-lg text-xs font-medium">
+                                            {error}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Trajectories List */}
+                            <div className="flex flex-col gap-4">
+                                <h3 className="text-[10px] uppercase font-bold tracking-[0.2em] text-neutral-400 dark:text-neutral-500 border-b border-neutral-100 dark:border-neutral-800 pb-2">
+                                    TRAJECTORIES ({trajectories.length})
+                                </h3>
+
+                                {trajectories.length === 0 ? (
+                                    <div className="py-12 border-2 border-dashed border-neutral-100 dark:border-neutral-800 rounded-2xl flex flex-col items-center justify-center text-neutral-400 dark:text-neutral-600 italic text-sm">
+                                        No files uploaded yet.
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col gap-2">
+                                        {trajectories.map((traj: Trajectory) => (
+                                            <LegendItem
+                                                key={traj.id}
+                                                trajectory={traj}
+                                                onAllianceChange={handleAllianceChange}
+                                                onRemove={handleRemove}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                {/* Info footer */}
-                <div style={{ color: '#666', fontSize: '12px', textAlign: 'center' }}>
-                    Field: {FIELD_LENGTH_M}m × {FIELD_WIDTH_M}m | Robot: {ROBOT_SIZE_M}m × {ROBOT_SIZE_M}m | Blue
-                    Alliance origin at bottom-left
-                </div>
-            </div>
-        </Pokedex>
+            </Pokedex>
+        </div>
     );
 };
 
