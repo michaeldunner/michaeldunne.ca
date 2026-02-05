@@ -22,7 +22,6 @@ export function Article({
   subtitle,
   date,
   description,
-  statusLines,
   videoUrl,
 }: ArticleProps) {
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -77,12 +76,6 @@ export function Article({
                 <DJButton key={i} note={i} />
               ))}
             </div>
-          </div>
-
-          <div className="bg-neutral-200 dark:bg-neutral-700 text-green-700 dark:text-green-400 font-mono p-4 rounded-lg text-sm">
-            {statusLines.map((line, i) => (
-              <div key={i}>&gt; {line}</div>
-            ))}
           </div>
         </div>
 
