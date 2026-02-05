@@ -69,7 +69,7 @@ export function MySidebar() {
       {/* Main content area — clipped to viewport, no page scroll */}
       <div
         className={cn(
-          "flex-1 h-full bg-neutral-50 dark:bg-neutral-800 transition-all duration-200 overflow-y-auto md:overflow-hidden",
+          "flex-1 h-full bg-neutral-50 dark:bg-neutral-800 transition-all duration-200 overflow-y-auto",
           open ? "md:ml-[90px]" : "md:ml-[0px]",
         )}
       >

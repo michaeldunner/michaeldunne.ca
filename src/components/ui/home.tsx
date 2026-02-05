@@ -11,7 +11,7 @@ import { motion } from "motion/react";
 function Home() {
   return (
     <div className="flex flex-1 min-h-screen">
-      <div className="relative flex min-h-screen w-full flex-col items-center justify-start overflow-y-auto rounded-tl-2xl border border-neutral-200 bg-white p-2 md:justify-center dark:border-neutral-700 dark:bg-neutral-900">
+      <div className="relative flex min-h-screen w-full flex-col items-center justify-start overflow-y-auto rounded-tl-2xl border border-neutral-200 bg-white p-2 dark:border-neutral-700 dark:bg-neutral-900">
         <div className="relative z-20 mt-10 mb-8 flex shrink-0 justify-center md:absolute md:top-10 md:my-0">
           <EncryptedText
             text="Michael Dunne"
@@ -38,7 +38,7 @@ function Home() {
               },
             },
           }}
-          className="flex z-10 w-full flex-col items-center justify-center gap-6 pb-10 md:flex-row md:pb-0 max-w-6xl"
+          className="flex z-10 w-full flex-col items-center justify-center gap-6 pb-10 md:flex-row md:flex-wrap md:pb-0 max-w-7xl mt-24 md:mt-48"
         >
           <motion.div
             variants={{
@@ -133,6 +133,18 @@ function Home() {
               text="I made this because I wanted a way to easily solve systems of linear equations"
               to="/rref"
             />
+          </motion.div>
+          <motion.div
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: {
+                opacity: 1,
+                y: 0,
+                transition: { duration: 0.5, ease: "easeOut" },
+              },
+            }}
+            className="flex items-center justify-center"
+          >
             <PokemonCard
               imageURL={choreo}
               colour="bg-red-500"
