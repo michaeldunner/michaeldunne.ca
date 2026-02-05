@@ -662,7 +662,7 @@ const ChoreoOverlayPage: React.FC = () => {
                                     Trajectory Visualizer
                                 </h1>
                                 <p className="text-neutral-500 dark:text-neutral-400 text-sm leading-relaxed mb-6">
-                                    Upload `.traj` files from Choreo to visualize and compare paths across different alliances.
+                                    Upload .traj files from Choreo to visualize and compare mutliple paths at once.
                                 </p>
 
                                 <div className="flex flex-col gap-3">
