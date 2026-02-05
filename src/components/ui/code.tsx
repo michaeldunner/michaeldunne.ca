@@ -258,7 +258,7 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
   return (
     <div
       ref={scrollContainerRef}
-      className="md:h-full min-h-screen w-full bg-white dark:bg-neutral-950 p-4 md:p-8 overflow-y-auto"
+      className="min-h-screen w-full bg-white dark:bg-neutral-950 p-4 md:p-8"
     >
       <Pokedex>
         <div className="flex flex-col w-full">
@@ -268,11 +268,10 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
               gridTemplateColumns: isMobile ? "1fr" : (isFocusMode ? "1fr 0fr" : "1fr 1fr")
             }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="grid grid-cols-1 md:grid-cols-[1fr_1fr] items-stretch w-full border-b border-neutral-300 dark:border-neutral-700 md:h-[800px] h-auto md:overflow-hidden"
+            className={`grid grid-cols-1 md:grid-cols-[1fr_1fr] items-stretch w-full border-b border-neutral-300 dark:border-neutral-700 ${isFocusMode ? 'md:h-[800px]' : 'md:min-h-[800px]'} h-auto`}
           >
             {/* Top-Left: Editor Section */}
             <motion.div
-              layout="position"
               className={`p-8 pt-24 md:p-8 md:pt-32 bg-neutral-100 dark:bg-neutral-800 flex flex-col gap-6 border-b md:border-b-0 border-neutral-300 dark:border-neutral-700 md:overflow-hidden relative z-0 ${!isFocusMode ? 'md:border-r' : ''}`}
             >
               <div className="flex flex-col">
@@ -350,7 +349,6 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
                       />
                     </div>
                     <motion.button
-                      layout="position"
                       onClick={solveRREF}
                       disabled={!Module}
                       whileHover={Module ? { scale: 1.02, translateY: -2 } : {}}
@@ -390,7 +388,7 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
                             title={hasError ? inputErrors[i] : undefined}
                             readOnly={activeTab === 'rref' && displayMode === 'decimal'}
                             onChange={(e) => updateMatrixValue(i, e.target.value)}
-                            className={`w-full text-center rounded-lg border font-mono focus:ring-2 outline-none transition-all shadow-sm py-2 text-sm ${isFocusMode ? 'px-4' : 'px-1'} ${activeTab === 'rref' && displayMode === 'decimal' ? 'cursor-not-allowed' : ''} ${hasError ? 'border-red-500 bg-red-50 dark:bg-red-950/30 focus:ring-red-500/50' : 'border-neutral-100 dark:border-neutral-800 dark:bg-neutral-950 focus:ring-red-500/30 hover:bg-neutral-50 dark:hover:bg-neutral-900'}`}
+                            className={`w-full text-center rounded-lg border font-mono focus:ring-2 outline-none transition-all shadow-sm py-2 text-sm px-2 ${activeTab === 'rref' && displayMode === 'decimal' ? 'cursor-not-allowed' : ''} ${hasError ? 'border-red-500 bg-red-50 dark:bg-red-950/30 focus:ring-red-500/50' : 'border-neutral-100 dark:border-neutral-800 dark:bg-neutral-950 focus:ring-red-500/30 hover:bg-neutral-50 dark:hover:bg-neutral-900'}`}
                           />
                         );
                       })}
@@ -402,7 +400,6 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
 
             {/* Top-Right: Description Section (Collapsed in Focus Mode) */}
             <motion.div
-              layout="position"
               initial={false}
               animate={{
                 opacity: (!isMobile && isFocusMode) ? 0 : 1,
@@ -410,7 +407,7 @@ export function Code({ title, subtitle, date, description, code }: CodeProps) {
                 paddingRight: (!isMobile && isFocusMode) ? 0 : undefined,
                 pointerEvents: (!isMobile && isFocusMode) ? 'none' : 'auto'
               }}
-              className="p-8 pt-24 md:p-12 md:pt-32 bg-white dark:bg-neutral-900 md:overflow-hidden relative z-0"
+              className="p-8 pt-24 md:p-12 md:pt-32 bg-white dark:bg-neutral-900 md:overflow-hidden relative z-0 min-w-0"
             >
               <motion.div
                 layout="position"

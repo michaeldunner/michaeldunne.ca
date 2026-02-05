@@ -61,7 +61,7 @@ export function DJButton({ note }: DJButtonProps) {
         scale: isPressed ? 0.92 : 1,
       }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
-      className="w-12 h-12 rounded-lg border-2 border-neutral-700/50 flex items-center justify-center relative overflow-hidden group cursor-pointer touch-none select-none"
+      className="w-16 h-16 rounded-xl border-2 border-neutral-700/50 flex items-center justify-center relative overflow-hidden group cursor-pointer touch-none select-none"
     >
       <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
     </motion.button>

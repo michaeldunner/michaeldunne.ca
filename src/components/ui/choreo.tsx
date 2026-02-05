@@ -585,7 +585,7 @@ const ChoreoOverlayPage: React.FC = () => {
     }, [isPlaying, animate]);
 
     return (
-        <div className="md:h-full min-h-screen w-full bg-white dark:bg-neutral-950 p-4 md:p-8 overflow-y-auto">
+        <div className="min-h-screen w-full bg-white dark:bg-neutral-950 p-4 md:p-8">
             <Pokedex>
                 <div className="flex flex-col w-full">
                     {/* Header Row - Simplified since Pokedex provides the frame */}
@@ -596,30 +596,17 @@ const ChoreoOverlayPage: React.FC = () => {
                     </div>
 
                     {/* Main Split View */}
-                    <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr] items-stretch w-full border-b border-neutral-300 dark:border-neutral-700 md:h-[800px] h-auto overflow-hidden">
+                    <div className="grid grid-cols-1 md:grid-cols-[2.5fr_1fr] items-stretch w-full border-b border-neutral-300 dark:border-neutral-700 h-auto">
 
                         {/* Left Column: Visualizer & Timeline */}
-                        <div className="p-6 pt-24 md:p-8 md:pt-32 bg-neutral-100 dark:bg-neutral-800 flex flex-col gap-6 border-b md:border-b-0 md:border-r border-neutral-300 dark:border-neutral-700 overflow-hidden relative">
-                            {/* Field Visualization Container */}
-                            <div className="flex-1 bg-white dark:bg-neutral-900/50 rounded-2xl border border-neutral-200 dark:border-neutral-700 p-4 shadow-xl overflow-hidden flex items-center justify-center">
+                        <div className="p-6 pt-24 md:p-8 md:pt-32 bg-neutral-100 dark:bg-neutral-800 flex flex-col gap-6 border-b md:border-b-0 md:border-r border-neutral-300 dark:border-neutral-700 relative">
+                            <div className="flex-1 bg-white dark:bg-neutral-900/50 rounded-2xl border border-neutral-200 dark:border-neutral-700 p-4 shadow-xl overflow-hidden flex items-center justify-center min-h-[400px] md:min-h-[600px]">
                                 <svg
                                     viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
                                     className="w-full h-auto max-h-full"
                                     preserveAspectRatio="xMidYMid meet"
                                 >
                                     <FieldGrid showGrid={true} />
-                                    {trajectories.length === 0 && (
-                                        <text
-                                            x={SVG_WIDTH / 2}
-                                            y={SVG_HEIGHT / 2}
-                                            textAnchor="middle"
-                                            dominantBaseline="middle"
-                                            fill="#666"
-                                            className="text-4xl font-sans font-medium"
-                                        >
-                                            No trajectories loaded.
-                                        </text>
-                                    )}
                                     {trajectories.map((traj: Trajectory) => (
                                         <TrajectoryPath key={traj.id} trajectory={traj} />
                                     ))}

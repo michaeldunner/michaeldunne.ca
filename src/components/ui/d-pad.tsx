@@ -7,10 +7,10 @@ interface DPadProps {
 
 export function DPad({ onNext, onPrev }: DPadProps) {
   return (
-    <div className="relative w-32 h-32 flex items-center justify-center translate-x-4">
+    <div className="relative w-40 h-40 flex items-center justify-center">
       <svg
-        width="100"
-        height="100"
+        width="130"
+        height="130"
         viewBox="0 0 100 100"
         className="drop-shadow-lg overflow-visible"
       >
@@ -38,12 +38,12 @@ export function DPad({ onNext, onPrev }: DPadProps) {
       {/* Logical Buttons (Invisible but interactive) */}
       <button
         onClick={onPrev}
-        className="absolute left-1 w-10 h-10 z-10 cursor-pointer"
+        className="absolute left-2 w-14 h-14 z-10 cursor-pointer"
         aria-label="Previous"
       />
       <button
         onClick={onNext}
-        className="absolute right-1 w-10 h-10 z-10 cursor-pointer"
+        className="absolute right-0 w-14 h-14 z-10 cursor-pointer"
         aria-label="Next"
       />
     </div>

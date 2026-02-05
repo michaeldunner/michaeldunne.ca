@@ -57,10 +57,10 @@ export function PDF() {
     };
 
     return (
-        <div className="min-h-screen w-full bg-white dark:bg-neutral-950 p-4 md:p-8 overflow-y-auto">
+        <div className="min-h-screen w-full bg-white dark:bg-neutral-950 p-4 md:p-8">
             <Pokedex>
                 {/* Left Col: Controls & File List */}
-                <div className="md:w-1/2 p-8 pt-24 bg-neutral-100 dark:bg-neutral-800 flex flex-col gap-6 border-b md:border-b-0 md:border-r border-neutral-300 dark:border-neutral-700 overflow-hidden">
+                <div className="md:w-1/2 p-8 pt-24 bg-neutral-100 dark:bg-neutral-800 flex flex-col gap-6 border-b md:border-b-0 md:border-r border-neutral-300 dark:border-neutral-700">
                     {/* File Input Zone */}
                     <div className="relative group">
                         <input
@@ -84,7 +84,7 @@ export function PDF() {
                     </div>
 
                     {/* Reorderable List */}
-                    <div className="flex-1 overflow-y-auto overflow-x-hidden pr-2">
+                    <div className="pr-2">
                         <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                             <IconDragDrop className="w-3 h-3" />
                             Order
@@ -144,7 +144,7 @@ export function PDF() {
                 </div>
 
                 {/* Right Col: Output & Actions */}
-                <div className="md:w-1/2 p-8 pt-24 md:p-12 md:pt-24 overflow-y-auto">
+                <div className="md:w-1/2 p-8 pt-24 md:p-12 md:pt-24">
                     <motion.div
                         initial={{ x: 20, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
