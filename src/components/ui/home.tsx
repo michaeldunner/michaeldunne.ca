@@ -1,7 +1,7 @@
 import { EncryptedText } from "./encrypted-text";
 import { NowPlayingCard } from "./now-playing";
 import { PokemonCard } from "./pokemon-card";
-import charizard from "../../assets/charizard.jpg";
+// import charizard from "../../assets/charizard.jpg";
 import choreo from "../../assets/choreo.png";
 import pdf from "../../assets/pdf.png";
 import rref from "../../assets/rref.png";
