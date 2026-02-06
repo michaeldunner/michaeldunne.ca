@@ -85,7 +85,7 @@ function normalizeRotation(rotation: number): number {
 function flipSampleToRed(sample: Sample): Sample {
     const redX = FIELD_LENGTH_M - sample.x;
     const redY = FIELD_WIDTH_M - sample.y;
-    const redHeading = normalizeRotation(Math.PI - sample.heading);
+    const redHeading = normalizeRotation(Math.PI + sample.heading);
 
     return {
         ...sample,
