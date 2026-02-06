@@ -429,12 +429,11 @@ const ChoreoOverlayPage: React.FC = () => {
     // Calculate max time across all trajectories
     const maxTime = useMemo(() => {
         if (trajectories.length === 0) return 0;
-        return Math.max(
-            ...trajectories.map((t: Trajectory) => {
-                if (t.samples.length === 0) return 0;
-                return t.samples[t.samples.length - 1].t;
-            })
-        );
+        return trajectories.reduce((max, t) => {
+            if (t.samples.length === 0) return max;
+            const lastSampleTime = t.samples[t.samples.length - 1].t;
+            return Math.max(max, lastSampleTime);
+        }, 0);
     }, [trajectories]);
 
     // Handle file upload
@@ -639,7 +638,7 @@ const ChoreoOverlayPage: React.FC = () => {
                                     <input
                                         type="range"
                                         min={0}
-                                        max={maxTime || 10}
+                                        max={maxTime || 0.01} // Small non-zero default to avoid console warnings if no paths
                                         step={0.01}
                                         value={currentTime}
                                         onChange={handleTimeChange}
