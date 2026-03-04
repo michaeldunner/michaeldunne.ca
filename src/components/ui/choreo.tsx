@@ -26,6 +26,13 @@ interface Trajectory {
     originalSamples: Sample[];
     samples: Sample[];
     color: string;
+    splits: number[];
+    splitDelays: number[];
+}
+
+interface SplitTimeInfo {
+    trajTime: number;
+    delay: number;
 }
 
 interface TrajFile {
@@ -33,6 +40,7 @@ interface TrajFile {
     version?: number;
     trajectory: {
         samples: Array<Sample>;
+        splits?: number[];
     };
 }
 
@@ -207,6 +215,65 @@ function validateTrajFile(data: unknown): data is TrajFile {
  */
 function generateId(): string {
     return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+}
+
+/**
+ * Compute the split time info array for a trajectory.
+ * Returns one entry per non-zero split: { trajTime, delay }.
+ */
+function getSplitTimeInfos(traj: Trajectory): SplitTimeInfo[] {
+    const infos: SplitTimeInfo[] = [];
+    for (let i = 1; i < traj.splits.length; i++) {
+        const sampleIndex = traj.splits[i];
+        if (sampleIndex < traj.samples.length) {
+            infos.push({
+                trajTime: traj.samples[sampleIndex].t,
+                delay: traj.splitDelays[i - 1] || 0,
+            });
+        }
+    }
+    return infos;
+}
+
+/**
+ * Map a virtual timeline time (which includes delay gaps) to the effective
+ * trajectory time. During a delay gap, returns the split point's trajectory
+ * time so the robot holds still.
+ */
+function getEffectiveTrajectoryTime(currentTime: number, splitInfos: SplitTimeInfo[]): number {
+    const EPS = 1e-9;
+    let accumulatedDelay = 0;
+
+    for (const info of splitInfos) {
+        const gapStart = info.trajTime + accumulatedDelay;
+        const gapEnd = gapStart + info.delay;
+
+        if (currentTime < gapStart - EPS) {
+            // Before this split's gap — subtract all accumulated delays so far
+            return currentTime - accumulatedDelay;
+        }
+
+        if (currentTime < gapEnd + EPS) {
+            // Inside this split's delay gap — hold at split time
+            return info.trajTime;
+        }
+
+        accumulatedDelay += info.delay;
+    }
+
+    // Past all splits — subtract total accumulated delay
+    return currentTime - accumulatedDelay;
+}
+
+/**
+ * Compute the virtual timeline duration for a trajectory
+ * (trajectory duration + sum of all delays)
+ */
+function getVirtualDuration(traj: Trajectory): number {
+    if (traj.samples.length === 0) return 0;
+    const trajDuration = traj.samples[traj.samples.length - 1].t;
+    const totalDelay = traj.splitDelays.reduce((sum, d) => sum + d, 0);
+    return trajDuration + totalDelay;
 }
 
 // ============================================================================
@@ -412,6 +479,79 @@ const LegendItem: React.FC<LegendItemProps> = ({ trajectory, onAllianceChange, o
     );
 };
 
+interface SplitDelayControlsProps {
+    trajectories: Trajectory[];
+    onDelayChange: (trajectoryId: string, splitIndex: number, value: number) => void;
+}
+
+const SplitDelayControls: React.FC<SplitDelayControlsProps> = ({ trajectories, onDelayChange }) => {
+    const trajsWithSplits = trajectories.filter(t => t.splits.length > 1);
+    if (trajsWithSplits.length === 0) return null;
+
+    return (
+        <div className="flex flex-col gap-4">
+            <h3 className="text-[10px] uppercase font-bold tracking-[0.2em] text-neutral-400 dark:text-neutral-500 border-b border-neutral-100 dark:border-neutral-800 pb-2">
+                SPLIT DELAYS
+            </h3>
+            {trajsWithSplits.map(traj => {
+                const splitInfos = getSplitTimeInfos(traj);
+                return (
+                    <div key={traj.id} className="flex flex-col gap-2">
+                        {trajsWithSplits.length > 1 && (
+                            <div className="flex items-center gap-2">
+                                <div
+                                    className="w-3 h-3 rounded-sm flex-shrink-0"
+                                    style={{ backgroundColor: traj.color }}
+                                />
+                                <span className="text-xs font-semibold text-neutral-600 dark:text-neutral-300 truncate">
+                                    {traj.filename}
+                                </span>
+                            </div>
+                        )}
+                        {splitInfos.map((info, idx) => (
+                            <div key={idx} className="p-3 bg-neutral-50 dark:bg-neutral-800/80 border border-neutral-100 dark:border-neutral-700/50 rounded-xl">
+                                <label className="block text-[10px] uppercase font-bold tracking-widest text-neutral-400 dark:text-neutral-500 mb-2">
+                                    Pause at T={info.trajTime.toFixed(2)}s
+                                </label>
+                                <div className="flex items-center gap-3">
+                                    <input
+                                        type="range"
+                                        min={0}
+                                        max={20}
+                                        step={0.1}
+                                        value={traj.splitDelays[idx]}
+                                        onChange={(e) => onDelayChange(traj.id, idx, parseFloat(e.target.value))}
+                                        className="flex-1 h-2 bg-neutral-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-red-600"
+                                    />
+                                    <input
+                                        type="number"
+                                        min={0}
+                                        max={20}
+                                        step={0.1}
+                                        value={traj.splitDelays[idx]}
+                                        onChange={(e) => {
+                                            const v = parseFloat(e.target.value);
+                                            if (!isNaN(v)) onDelayChange(traj.id, idx, Math.max(0, Math.min(20, v)));
+                                        }}
+                                        onBlur={(e) => {
+                                            let v = parseFloat(e.target.value);
+                                            if (isNaN(v)) v = 0;
+                                            v = Math.max(0, Math.min(20, v));
+                                            onDelayChange(traj.id, idx, v);
+                                        }}
+                                        className="w-16 px-2 py-1 text-xs font-mono text-center bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg outline-none focus:ring-2 focus:ring-red-500/30 transition-all"
+                                    />
+                                    <span className="text-[10px] text-neutral-400 font-medium">s</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                );
+            })}
+        </div>
+    );
+};
+
 // ============================================================================
 // Main Component
 // ============================================================================
@@ -426,13 +566,11 @@ const ChoreoOverlayPage: React.FC = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const colorIndexRef = useRef(0);
 
-    // Calculate max time across all trajectories
+    // Calculate max time across all trajectories (virtual timeline including delays)
     const maxTime = useMemo(() => {
         if (trajectories.length === 0) return 0;
         return trajectories.reduce((max, t) => {
-            if (t.samples.length === 0) return max;
-            const lastSampleTime = t.samples[t.samples.length - 1].t;
-            return Math.max(max, lastSampleTime);
+            return Math.max(max, getVirtualDuration(t));
         }, 0);
     }, [trajectories]);
 
@@ -465,6 +603,13 @@ const ChoreoOverlayPage: React.FC = () => {
                         omega: s.omega || 0,
                     }));
 
+                    // Parse splits (default to [0] if absent)
+                    const splits: number[] = Array.isArray(data.trajectory.splits)
+                        ? data.trajectory.splits
+                        : [0];
+                    // One delay per non-zero split, initialized to 0
+                    const splitDelays = new Array(Math.max(0, splits.length - 1)).fill(0);
+
                     const color = COLOR_PALETTE[colorIndexRef.current % COLOR_PALETTE.length];
                     colorIndexRef.current++;
 
@@ -475,6 +620,8 @@ const ChoreoOverlayPage: React.FC = () => {
                         originalSamples,
                         samples: originalSamples,
                         color,
+                        splits,
+                        splitDelays,
                     });
                 } catch (err) {
                     newErrors.push(`Failed to load ${file.name}: ${err instanceof Error ? err.message : 'Invalid JSON'}`);
@@ -518,6 +665,18 @@ const ChoreoOverlayPage: React.FC = () => {
     // Handle trajectory removal
     const handleRemove = useCallback((id: string) => {
         setTrajectories((prev) => prev.filter((t) => t.id !== id));
+    }, []);
+
+    // Handle split delay change
+    const handleSplitDelayChange = useCallback((trajectoryId: string, splitIndex: number, value: number) => {
+        setTrajectories((prev) =>
+            prev.map((t) => {
+                if (t.id !== trajectoryId) return t;
+                const newDelays = [...t.splitDelays];
+                newDelays[splitIndex] = value;
+                return { ...t, splitDelays: newDelays };
+            })
+        );
     }, []);
 
     // Handle clear all
@@ -608,7 +767,9 @@ const ChoreoOverlayPage: React.FC = () => {
                                         <TrajectoryPath key={traj.id} trajectory={traj} />
                                     ))}
                                     {trajectories.map((traj: Trajectory) => {
-                                        const pose = getPoseAtTime(traj.samples, currentTime);
+                                        const splitInfos = getSplitTimeInfos(traj);
+                                        const effectiveTime = getEffectiveTrajectoryTime(currentTime, splitInfos);
+                                        const pose = getPoseAtTime(traj.samples, effectiveTime);
                                         return (
                                             <RobotVisualization
                                                 key={`robot-${traj.id}`}
@@ -635,16 +796,40 @@ const ChoreoOverlayPage: React.FC = () => {
                                         <span>{currentTime.toFixed(2)}s</span>
                                         <span>{maxTime.toFixed(2)}s</span>
                                     </div>
-                                    <input
-                                        type="range"
-                                        min={0}
-                                        max={maxTime || 0.01} // Small non-zero default to avoid console warnings if no paths
-                                        step={0.01}
-                                        value={currentTime}
-                                        onChange={handleTimeChange}
-                                        disabled={trajectories.length === 0}
-                                        className="w-full h-2 bg-neutral-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-red-600 disabled:cursor-not-allowed"
-                                    />
+                                    <div className="relative w-full">
+                                        <input
+                                            type="range"
+                                            min={0}
+                                            max={maxTime || 0.01}
+                                            step={0.01}
+                                            value={currentTime}
+                                            onChange={handleTimeChange}
+                                            disabled={trajectories.length === 0}
+                                            className="w-full h-2 bg-neutral-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-red-600 disabled:cursor-not-allowed relative z-10"
+                                        />
+                                        {/* Split tick marks */}
+                                        {maxTime > 0 && trajectories.map((traj) => {
+                                            const splitInfos = getSplitTimeInfos(traj);
+                                            if (splitInfos.length === 0) return null;
+                                            let accDelay = 0;
+                                            return splitInfos.map((info, idx) => {
+                                                const virtualPos = info.trajTime + accDelay;
+                                                accDelay += info.delay;
+                                                const pct = (virtualPos / maxTime) * 100;
+                                                return (
+                                                    <div
+                                                        key={`${traj.id}-split-${idx}`}
+                                                        className="absolute top-0 w-0.5 h-full rounded-full pointer-events-none"
+                                                        style={{
+                                                            left: `${pct}%`,
+                                                            backgroundColor: traj.color,
+                                                            opacity: 0.6,
+                                                        }}
+                                                    />
+                                                );
+                                            });
+                                        })}
+                                    </div>
                                 </div>
                             </div>
                         </motion.div>
@@ -725,6 +910,12 @@ const ChoreoOverlayPage: React.FC = () => {
                                     </div>
                                 )}
                             </div>
+
+                            {/* Split Delay Controls */}
+                            <SplitDelayControls
+                                trajectories={trajectories}
+                                onDelayChange={handleSplitDelayChange}
+                            />
                         </motion.div>
                     </div>
                 </div>
