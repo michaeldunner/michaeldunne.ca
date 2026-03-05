@@ -8,8 +8,8 @@ import charizard from "../../assets/charizard.jpg";
 const fac = new FastAverageColor();
 
 export function LetterboxdCard() {
-  const { data } = useQuery<LetterboxdResponse>({
-    queryKey: ["letterboxd"],
+  const { data, isPending } = useQuery<LetterboxdResponse>({
+    queryKey: ["Recent Film"],
     queryFn: async () => {
       const response = await fetch(
         "https://api.rss2json.com/v1/api.json?rss_url=https://letterboxd.com/michaeldunner/rss/",
@@ -52,14 +52,15 @@ export function LetterboxdCard() {
       imageURL = imgMatch[1];
     }
   }
-  // Fallback if no image found
-  const finalImage = hasItem && imageURL ? imageURL : charizard;
+  // While the query is still in flight, pass undefined so PokemonCard shows its skeleton.
+  // Only fall back to Charizard if the API responded but returned no image.
+  const finalImage = isPending ? undefined : imageURL || charizard;
 
   // Default green-400 roughly (#10B981)
   const [bgColor, setBgColor] = useState<string | undefined>(undefined);
 
   // Determine the background color: dynamic if loaded, default hex if not
-  const finalBackgroundColor = hasItem && bgColor ? bgColor : "#10B981";
+  const finalBackgroundColor = isPending ? undefined : (hasItem && bgColor ? bgColor : "#10B981");
 
   useEffect(() => {
     if (hasItem && imageURL) {
