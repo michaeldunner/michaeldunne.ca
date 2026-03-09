@@ -80,6 +80,7 @@ export function LetterboxdCard() {
 
   return (
     <PokemonCard
+      isLoading={isPending}
       imageURL={finalImage}
       backgroundColor={finalBackgroundColor}
       name={"Recent Film"}

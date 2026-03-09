@@ -12,7 +12,7 @@ import { FastAverageColor } from "fast-average-color";
 const fac = new FastAverageColor();
 
 export function NowPlayingCard() {
-  const { data } = useQuery<SpotifyResponse>({
+  const { data, isPending } = useQuery<SpotifyResponse>({
     queryKey: ["spotify-now-playing"],
     queryFn: async () => {
       const response = await fetch(
@@ -59,6 +59,7 @@ export function NowPlayingCard() {
 
   return (
     <PokemonCard
+      isLoading={isPending}
       name={name}
       imageURL={image}
       backgroundColor={finalBackgroundColor}

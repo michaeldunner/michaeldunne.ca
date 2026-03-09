@@ -12,6 +12,7 @@ type PokemonCardProps = {
   text?: React.ReactNode;
   colour?: string; // Tailwind class
   backgroundColor?: string; // Hex code or other CSS color value
+  isLoading?: boolean;
 };
 
 export function PokemonCard({
@@ -21,6 +22,7 @@ export function PokemonCard({
   text,
   colour,
   backgroundColor,
+  isLoading,
   to,
 }: PokemonCardProps & { to?: string }) {
   const glareRef = useRef<import("../ui/glare-card").GlareCardApi>(null);
@@ -138,7 +140,7 @@ export function PokemonCard({
           className={`relative flex w-[315px] h-[440px] rounded-2xl border-16 border-yellow-400 ${colour ?? ""} p-4 justify-center`}
           style={{ backgroundColor: backgroundColor }}
         >
-          {!isImageReady ? (
+          {!isImageReady || isLoading ? (
             <Skeleton className="absolute top-2 left-5 h-7 w-32" />
           ) : (
             <span className="absolute top-2 left-5 font-bold text-xl text-black dark:text-black">
@@ -158,13 +160,13 @@ export function PokemonCard({
                 <img
                   ref={imgRef}
                   className="h-full w-full absolute inset-0 object-cover transition-opacity duration-300"
-                  style={{ opacity: isImageReady ? 1 : 0 }}
+                  style={{ opacity: (!isImageReady || isLoading) ? 0 : 1 }}
                   src={imageURL}
                   alt={title || name || ""}
                 />
 
                 {/* Loader overlay - hidden when image ready */}
-                {!isImageReady && (
+                {(!isImageReady || isLoading) && (
                   <div className="absolute inset-0 z-10">
                     <Skeleton className="w-full h-full rounded-none" />
                   </div>
@@ -172,7 +174,7 @@ export function PokemonCard({
               </GlareCard>
             </div>
             <div className="flex flex-col items-center gap-2">
-              {!isImageReady ? (
+              {(!isImageReady || isLoading) ? (
                 <>
                   <Skeleton className="h-7 w-40" />
                   <Skeleton className="h-4 w-24" />
