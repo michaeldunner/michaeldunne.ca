@@ -154,6 +154,22 @@ function Home() {
               to="/choreo"
             />
           </motion.div>
+          <motion.div
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+            }}
+            className="flex items-center justify-center"
+          >
+            <PokemonCard
+              imageURL={pdf}
+              colour="bg-blue-400"
+              name="LinkedIn Puzzles"
+              title="LinkedIn Puzzle Statistics"
+              text="Stats from all the LinkedIn puzzles I've solved"
+              to="/linkedin-puzzles"
+            />
+          </motion.div>
         </motion.div>
         {/* Mobile Spacer */}
         <div className="h-24 w-full shrink-0 md:hidden" />
