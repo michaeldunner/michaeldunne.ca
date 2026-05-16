@@ -492,10 +492,10 @@ function GameTab({
                 stroke: "#fff",
                 strokeWidth: 2,
                 cursor: "pointer",
-                onClick: (_: unknown, payload: { index: number }) => {
+                onClick: (_: any, payload: any) => {
                   const point = results.find(
                     (r) =>
-                      r.puzzle_number === chartData[payload.index]?.puzzle_number,
+                      r.puzzle_number === payload?.puzzle_number,
                   );
                   if (point) setSelectedPoint(point);
                 },
@@ -652,7 +652,7 @@ export default function LinkedInPuzzles() {
                     <button
                       key={tab.label}
                       onClick={() => setActiveTab(tab.key)}
-                      className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
+                      className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all cursor-pointer ${
                         activeTab === tab.key
                           ? "bg-red-600 text-white shadow-lg shadow-red-500/20"
                           : "bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 border border-neutral-200 dark:border-neutral-700"
