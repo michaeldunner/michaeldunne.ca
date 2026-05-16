@@ -615,17 +615,20 @@ export default function LinkedInPuzzles() {
 
             <div className="prose prose-neutral dark:prose-invert">
               <p className="text-neutral-600 dark:text-neutral-400 text-sm leading-relaxed">
-                Every day LinkedIn publishes a set of five daily puzzles —{" "}
-                <strong>Queens</strong>, <strong>Tango</strong>,{" "}
-                <strong>Patches</strong>, <strong>Zip</strong>, and{" "}
-                <strong>Pinpoint</strong>. I've been solving them daily and
-                tracking my results here. The four timed games measure how
-                quickly I finish, while Pinpoint tracks how many guesses it
-                takes to identify the hidden category.
+                Every day, LinkedIn publishes a set of daily puzzles. They say, “One of the best ways to deepen and reignite relationships at work is simply by having fun together. So we're excited to roll out a series of thinking-oriented games that allow you to do just that.” I love learning and solving problems, and I think that succeeding at something challenging is more rewarding than succeeding at an easy task. This is a philosophy I carry in my daily life, and likely why I enjoy solving the LinkedIn puzzles so much.
+              </p>
+              <p className="text-neutral-600 dark:text-neutral-400 text-sm leading-relaxed mt-4">
+                The games I play daily are <strong>Queens</strong>, <strong>Tango</strong>, <strong>Patches</strong>, <strong>Zip</strong>, and <strong>Pinpoint</strong>. I particularly like how with the LinkedIn puzzles, there is a leaderboard with your connections, so you can see how you did compared to them every day. However, there is some cool information that they don’t publish, so I have decided to track it myself.
+              </p>
+              <p className="text-neutral-600 dark:text-neutral-400 text-sm leading-relaxed mt-4">
+                This page uses a Cloudflare Worker to receive my LinkedIn puzzle results. After finishing a puzzle, I share the result to HTTP Shortcuts on Android, which sends it to my database. The stats are then pulled from the database and displayed here.
               </p>
               <p className="text-neutral-600 dark:text-neutral-400 text-sm leading-relaxed mt-4">
                 Select a game tab to see detailed stats, personal bests,
                 streaks, and a graph of every puzzle result over time.
+              </p>
+              <p className="text-neutral-600 dark:text-neutral-400 text-sm leading-relaxed mt-4">
+                One thing this page is missing is a way to quantify my results against those of other people. I encourage you to connect with me on LinkedIn to see my results, as I think they are quite good.
               </p>
             </div>
           </div>
