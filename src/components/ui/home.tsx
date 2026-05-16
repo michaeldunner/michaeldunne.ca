@@ -5,6 +5,7 @@ import { PokemonCard } from "./pokemon-card";
 import choreo from "../../assets/choreo.png";
 import pdf from "../../assets/pdf.png";
 import rref from "../../assets/rref.png";
+import linkedin from "../../assets/linkedin.png";
 import { LetterboxdCard } from "./letterboxd";
 import { motion } from "motion/react";
 
@@ -162,8 +163,8 @@ function Home() {
             className="flex items-center justify-center"
           >
             <PokemonCard
-              imageURL={pdf}
-              colour="bg-blue-400"
+              imageURL={linkedin}
+              colour="bg-gray-300"
               name="LinkedIn Puzzles"
               title="LinkedIn Puzzle Statistics"
               text="Stats from all the LinkedIn puzzles I've solved"
