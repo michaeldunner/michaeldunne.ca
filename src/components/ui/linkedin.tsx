@@ -255,7 +255,7 @@ function ChartTooltip({ active, payload, game }: ChartTooltipProps) {
       <p className="text-[10px] text-neutral-400">{data.date}</p>
       <p className="text-sm font-bold text-red-400 mt-1">
         {isPinpoint(game)
-          ? `${data.value} guess${data.value !== 1 ? "es" : ""}`
+          ? data.value === 6 ? "Didn't Guess" : `${data.value} guess${data.value !== 1 ? "es" : ""}`
           : formatTime(data.value)}
       </p>
     </div>
@@ -343,24 +343,45 @@ function GameTab({
   );
   const legacy = legacyValues[game];
 
+  const extendedResults = useMemo(() => {
+    let baseData = [...results];
+    
+    if (isPinpoint(game) && grouped["Queens"]) {
+      const pinpointPuzzleNumbers = new Set(results.map((r) => r.puzzle_number));
+      const queensResults = grouped["Queens"];
+      
+      queensResults.forEach(qr => {
+        if (!pinpointPuzzleNumbers.has(qr.puzzle_number)) {
+           baseData.push({
+             id: -qr.puzzle_number,
+             game: "Pinpoint",
+             puzzle_number: qr.puzzle_number,
+             time_seconds: null,
+             guesses: 6,
+             created_at: qr.created_at
+           });
+        }
+      });
+    }
+    return baseData.sort((a, b) => a.puzzle_number - b.puzzle_number);
+  }, [results, game, grouped]);
+
   const chartData = useMemo(() => {
-    const sorted = [...results].sort(
-      (a, b) => a.puzzle_number - b.puzzle_number,
-    );
-    return sorted.map((r) => ({
+    return extendedResults.map((r) => ({
       puzzle_number: r.puzzle_number,
       value: isPinpoint(game) ? (r.guesses ?? 0) : (r.time_seconds ?? 0),
       date: formatDate(r.created_at),
       id: r.id,
     }));
-  }, [results, game]);
+  }, [extendedResults, game]);
 
   const average = useMemo(() => {
-    if (chartData.length === 0) return 0;
+    const validData = isPinpoint(game) ? chartData.filter(d => d.value !== 6 && d.value > 0) : chartData;
+    if (validData.length === 0) return 0;
     return (
-      chartData.reduce((sum, d) => sum + d.value, 0) / chartData.length
+      validData.reduce((sum, d) => sum + d.value, 0) / validData.length
     );
-  }, [chartData]);
+  }, [chartData, game]);
 
   if (!stats) {
     return (
@@ -446,9 +467,9 @@ function GameTab({
               tickLine={false}
               axisLine={{ stroke: "#404040" }}
               tickFormatter={(val: number) =>
-                isPinpoint(game) ? String(val) : formatTime(val)
+                isPinpoint(game) ? (val === 6 ? "Failed" : String(val)) : formatTime(val)
               }
-              domain={isPinpoint(game) ? [0, 5] : ["auto", "auto"]}
+              domain={isPinpoint(game) ? [0, 6] : ["auto", "auto"]}
               label={{
                 value: isPinpoint(game) ? "Guesses" : "Time",
                 angle: -90,
@@ -493,9 +514,9 @@ function GameTab({
                 strokeWidth: 2,
                 cursor: "pointer",
                 onClick: (_: any, payload: any) => {
-                  const point = results.find(
+                  const point = extendedResults.find(
                     (r) =>
-                      r.puzzle_number === payload?.puzzle_number,
+                      r.puzzle_number === payload?.payload?.puzzle_number || r.puzzle_number === payload?.puzzle_number,
                   );
                   if (point) setSelectedPoint(point);
                 },
@@ -537,7 +558,7 @@ function GameTab({
             </span>
             <span className="text-sm font-bold text-red-400">
               {isPinpoint(game)
-                ? `${selectedPoint.guesses} guess${selectedPoint.guesses !== 1 ? "es" : ""}`
+                ? selectedPoint.guesses === 6 ? "Didn't guess" : `${selectedPoint.guesses} guess${selectedPoint.guesses !== 1 ? "es" : ""}`
                 : selectedPoint.time_seconds !== null
                   ? formatTime(selectedPoint.time_seconds)
                   : "—"}
