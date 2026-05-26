@@ -232,14 +232,18 @@ function LegacyBadge() {
   );
 }
 
+interface ChartDataPoint {
+  puzzle_number: number;
+  value: number;
+  rollingAvg: number | null;
+  date: string;
+  id: number;
+}
+
 interface ChartTooltipProps {
   active?: boolean;
   payload?: Array<{
-    payload: {
-      puzzle_number: number;
-      value: number;
-      date: string;
-    };
+    payload: ChartDataPoint;
   }>;
   game: string;
 }
@@ -258,6 +262,14 @@ function ChartTooltip({ active, payload, game }: ChartTooltipProps) {
           ? data.value === 6 ? "Didn't Guess" : `${data.value} guess${data.value !== 1 ? "es" : ""}`
           : formatTime(data.value)}
       </p>
+      {data.rollingAvg !== null && (
+        <p className="text-[10px] text-orange-400 mt-0.5">
+          7-day Average:{" "}
+          {isPinpoint(game)
+            ? data.rollingAvg.toFixed(1)
+            : formatTime(Math.round(data.rollingAvg))}
+        </p>
+      )}
     </div>
   );
 }
@@ -366,13 +378,33 @@ function GameTab({
     return baseData.sort((a, b) => a.puzzle_number - b.puzzle_number);
   }, [results, game, grouped]);
 
-  const chartData = useMemo(() => {
-    return extendedResults.map((r) => ({
+  const chartData = useMemo((): ChartDataPoint[] => {
+    const raw = extendedResults.map((r) => ({
       puzzle_number: r.puzzle_number,
       value: isPinpoint(game) ? (r.guesses ?? 0) : (r.time_seconds ?? 0),
       date: formatDate(r.created_at),
       id: r.id,
+      rollingAvg: null as number | null,
     }));
+
+    // Compute 7-day rolling average
+    const WINDOW = 7;
+    for (let i = 0; i < raw.length; i++) {
+      const windowStart = Math.max(0, i - WINDOW + 1);
+      const windowSlice = raw.slice(windowStart, i + 1);
+
+      // For Pinpoint, exclude "failed" (value=6) entries from the average
+      const validValues = isPinpoint(game)
+        ? windowSlice.filter((d) => d.value !== 6 && d.value > 0).map((d) => d.value)
+        : windowSlice.map((d) => d.value);
+
+      if (validValues.length > 0) {
+        raw[i].rollingAvg =
+          validValues.reduce((sum, v) => sum + v, 0) / validValues.length;
+      }
+    }
+
+    return raw;
   }, [extendedResults, game]);
 
   const average = useMemo(() => {
@@ -497,7 +529,19 @@ function GameTab({
             />
             <Line
               type="monotone"
+              dataKey="rollingAvg"
+              name="7-Day Avg"
+              stroke="#fb923c"
+              strokeWidth={2}
+              strokeOpacity={0.7}
+              dot={false}
+              activeDot={false}
+              connectNulls
+            />
+            <Line
+              type="monotone"
               dataKey="value"
+              name="Result"
               stroke="#ef4444"
               strokeWidth={2}
               dot={{
