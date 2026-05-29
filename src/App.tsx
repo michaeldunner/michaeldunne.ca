@@ -8,6 +8,7 @@ import { RREF } from "./components/ui/rref";
 import { PDF } from "./components/ui/pdf";
 import Choreo from "./components/ui/choreo";
 import LinkedInPuzzles from "./components/ui/linkedin";
+import TriviaBuzzer, { TriviaHost } from "./components/ui/trivia";
 
 function App() {
   return (
@@ -20,6 +21,8 @@ function App() {
           <Route path="pdf" element={<PDF />} />
           <Route path="choreo" element={<Choreo />} />
           <Route path="linkedin-puzzles" element={<LinkedInPuzzles />} />
+          <Route path="trivia-buzzer" element={<TriviaBuzzer />} />
+          <Route path="trivia-buzzer/host" element={<TriviaHost />} />
         </Route>
       </Routes>
     </ThemeProvider>
