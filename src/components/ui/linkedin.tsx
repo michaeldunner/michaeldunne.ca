@@ -31,7 +31,7 @@ interface PuzzleResult {
 // Constants
 // ============================================================================
 
-const GAMES = ["Queens", "Tango", "Patches", "Zip", "Pinpoint"];
+const GAMES = ["Queens", "Tango", "Patches", "Zip", "Wend", "Pinpoint"];
 
 // TODO: fill in legacy values
 const legacyValues: Record<string, { pb: string; streak: number }> = {
@@ -39,6 +39,7 @@ const legacyValues: Record<string, { pb: string; streak: number }> = {
   Tango: { pb: "0:18", streak: 190 },
   Patches: { pb: "0:09", streak: 48 },
   Zip: { pb: "0:04", streak: 190 },
+  Wend: { pb: "—", streak: 0 },
   Pinpoint: { pb: "1 guess", streak: 190 },
 };
 
@@ -683,7 +684,7 @@ export default function LinkedInPuzzles() {
                 Every day, LinkedIn publishes a set of daily puzzles. They say, “One of the best ways to deepen and reignite relationships at work is simply by having fun together. So we're excited to roll out a series of thinking-oriented games that allow you to do just that.” I love learning and solving problems, and I think that succeeding at something challenging is more rewarding than succeeding at an easy task. This is a philosophy I carry in my daily life, and likely why I enjoy solving the LinkedIn puzzles so much.
               </p>
               <p className="text-neutral-600 dark:text-neutral-400 text-sm leading-relaxed mt-4">
-                The games I play daily are <strong>Queens</strong>, <strong>Tango</strong>, <strong>Patches</strong>, <strong>Zip</strong>, and <strong>Pinpoint</strong>. I particularly like how with the LinkedIn puzzles, there is a leaderboard with your connections, so you can see how you did compared to them every day. However, there is some cool information that they don’t publish, so I have decided to track it myself.
+                The games I play daily are <strong>Queens</strong>, <strong>Tango</strong>, <strong>Patches</strong>, <strong>Zip</strong>, <strong>Wend</strong>, and <strong>Pinpoint</strong>. I particularly like how with the LinkedIn puzzles, there is a leaderboard with your connections, so you can see how you did compared to them every day. However, there is some cool information that they don't publish, so I have decided to track it myself.
               </p>
               <p className="text-neutral-600 dark:text-neutral-400 text-sm leading-relaxed mt-4">
                 This page uses a Cloudflare Worker to receive my LinkedIn puzzle results. After finishing a puzzle, I share the result to HTTP Shortcuts on Android, which sends it to my database. The stats are then pulled from the database and displayed here.
