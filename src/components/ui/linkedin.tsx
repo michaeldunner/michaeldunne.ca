@@ -53,6 +53,25 @@ function formatTime(seconds: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
+/**
+ * Formats a total duration, scaling up through minutes → hours → days.
+ * Leading zero units are suppressed: "0d" is never shown until there is at
+ * least one full day, and "0h" is never shown until there is at least one hour.
+ *
+ * < 3600 s  →  "Xm Ys"   (e.g. "47m 32s")
+ * < 86400 s →  "Xh Ym"   (e.g. "3h 12m")
+ * ≥ 86400 s →  "Xd Yh Zm" (e.g. "1d 4h 7m")
+ */
+function formatDuration(seconds: number): string {
+  const d = Math.floor(seconds / 86400);
+  const h = Math.floor((seconds % 86400) / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  if (d > 0) return `${d}d ${h}h ${m}m`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m ${s}s`;
+}
+
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("en-US", {
     month: "short",
@@ -275,65 +294,115 @@ function ChartTooltip({ active, payload, game }: ChartTooltipProps) {
   );
 }
 
+const TIMED_GAMES = GAMES.filter((g) => !isPinpoint(g));
+
 function OverviewTab({
   grouped,
 }: {
   grouped: Record<string, PuzzleResult[]>;
 }) {
+  const todayStr = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD
+
+  const totalTimeToday = useMemo(() => {
+    let sum = 0;
+    for (const game of TIMED_GAMES) {
+      for (const r of grouped[game] ?? []) {
+        if (
+          r.time_seconds !== null &&
+          new Date(r.created_at).toLocaleDateString("en-CA") === todayStr
+        ) {
+          sum += r.time_seconds;
+        }
+      }
+    }
+    return sum;
+  }, [grouped, todayStr]);
+
+  const totalTimeAllTime = useMemo(() => {
+    let sum = 0;
+    for (const game of TIMED_GAMES) {
+      for (const r of grouped[game] ?? []) {
+        if (r.time_seconds !== null) sum += r.time_seconds;
+      }
+    }
+    return sum;
+  }, [grouped]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="flex flex-col gap-4"
+      className="flex flex-col gap-6"
     >
-      <h3 className="text-sm font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-widest">
-        Latest Results
-      </h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {GAMES.map((game) => {
-          const results = grouped[game];
-          if (!results || results.length === 0) {
+      {/* Total time summary */}
+      <div>
+        <h3 className="text-sm font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-widest mb-3">
+          Total Time
+        </h3>
+        <div className="grid grid-cols-2 gap-3">
+          <StatCard
+            label="Today"
+            value={totalTimeToday > 0 ? formatTime(totalTimeToday) : "—"}
+            accent
+          />
+          <StatCard
+            label="All Time"
+            value={totalTimeAllTime > 0 ? formatDuration(totalTimeAllTime) : "—"}
+          />
+        </div>
+      </div>
+
+      {/* Per-game latest results */}
+      <div>
+        <h3 className="text-sm font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-widest mb-3">
+          Latest Results
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {GAMES.map((game) => {
+            const results = grouped[game];
+            if (!results || results.length === 0) {
+              return (
+                <div
+                  key={game}
+                  className="flex flex-col gap-2 p-4 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/60"
+                >
+                  <span className="text-sm font-bold text-neutral-900 dark:text-white">
+                    {game}
+                  </span>
+                  <span className="text-xs text-neutral-400">No data yet</span>
+                </div>
+              );
+            }
+            const latest = results.reduce((a, b) =>
+              new Date(a.created_at) > new Date(b.created_at) ? a : b,
+            );
+            const value = isPinpoint(game)
+              ? `${latest.guesses} guess${latest.guesses !== 1 ? "es" : ""}`
+              : latest.time_seconds !== null
+                ? formatTime(latest.time_seconds)
+                : "—";
             return (
               <div
                 key={game}
-                className="flex flex-col gap-2 p-4 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/60"
+                className="flex flex-col gap-2 p-4 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/60 hover:border-red-500/30 transition-colors"
               >
-                <span className="text-sm font-bold text-neutral-900 dark:text-white">
-                  {game}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-bold text-neutral-900 dark:text-white">
+                    {game}
+                  </span>
+                  <span className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 bg-neutral-200 dark:bg-neutral-700 px-2 py-0.5 rounded-md">
+                    #{latest.puzzle_number}
+                  </span>
+                </div>
+                <span className="text-2xl font-bold text-red-400">{value}</span>
+                <span className="text-[10px] text-neutral-400">
+                  {formatDate(latest.created_at)}
                 </span>
-                <span className="text-xs text-neutral-400">No data yet</span>
               </div>
             );
-          }
-          const latest = results.reduce((a, b) =>
-            new Date(a.created_at) > new Date(b.created_at) ? a : b,
-          );
-          const value = isPinpoint(game)
-            ? `${latest.guesses} guess${latest.guesses !== 1 ? "es" : ""}`
-            : latest.time_seconds !== null
-              ? formatTime(latest.time_seconds)
-              : "—";
-          return (
-            <div
-              key={game}
-              className="flex flex-col gap-2 p-4 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/60 hover:border-red-500/30 transition-colors"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-neutral-900 dark:text-white">
-                  {game}
-                </span>
-                <span className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 bg-neutral-200 dark:bg-neutral-700 px-2 py-0.5 rounded-md">
-                  #{latest.puzzle_number}
-                </span>
-              </div>
-              <span className="text-2xl font-bold text-red-400">{value}</span>
-              <span className="text-[10px] text-neutral-400">
-                {formatDate(latest.created_at)}
-              </span>
-            </div>
-          );
-        })}
+          })}
+        </div>
       </div>
     </motion.div>
   );
