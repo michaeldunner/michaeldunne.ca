@@ -39,7 +39,7 @@ const legacyValues: Record<string, { pb: string; streak: number }> = {
   Tango: { pb: "0:18", streak: 190 },
   Patches: { pb: "0:09", streak: 48 },
   Zip: { pb: "0:04", streak: 190 },
-  Wend: { pb: "—", streak: 0 },
+  Wend: { pb: "0:10", streak: 49 },
   Pinpoint: { pb: "1 guess", streak: 190 },
 };
 
