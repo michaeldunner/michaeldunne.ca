@@ -63,6 +63,7 @@ export const EncryptedText: React.FC<EncryptedTextProps> = ({
   const isInView = useInView(ref, { once: true });
 
   const [revealCount, setRevealCount] = useState<number>(0);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
   const lastFlipTimeRef = useRef<number>(0);
@@ -73,7 +74,6 @@ export const EncryptedText: React.FC<EncryptedTextProps> = ({
   useEffect(() => {
     if (!isInView) return;
 
-    // Reset state for a fresh animation whenever dependencies change
     const initial = text
       ? generateGibberishPreservingSpaces(text, charset)
       : "";
@@ -100,7 +100,6 @@ export const EncryptedText: React.FC<EncryptedTextProps> = ({
         return;
       }
 
-      // Re-randomize unrevealed scramble characters on an interval
       const timeSinceLastFlip = now - lastFlipTimeRef.current;
       if (timeSinceLastFlip >= Math.max(0, flipDelayMs)) {
         for (let index = 0; index < totalLength; index += 1) {
@@ -131,6 +130,18 @@ export const EncryptedText: React.FC<EncryptedTextProps> = ({
 
   if (!text) return null;
 
+  /** Bounce that ripples to neighbouring letters (no scaling). */
+  const getLetterAnim = (index: number) => {
+    if (hoveredIndex === null) return { y: 0 };
+    const d = Math.abs(index - hoveredIndex);
+    if (d === 0) return { y: -14 };
+    if (d === 1) return { y: -7 };
+    if (d === 2) return { y: -2 };
+    return { y: 0 };
+  };
+
+  const spring = { type: "spring" as const, stiffness: 450, damping: 16 };
+
   return (
     <div className="relative inline-block">
       <motion.span
@@ -149,13 +160,17 @@ export const EncryptedText: React.FC<EncryptedTextProps> = ({
                 generateRandomCharacter(charset));
 
           return (
-            <span
+            <motion.span
               key={index}
               className={cn(isRevealed ? revealedClassName : encryptedClassName)}
-              style={style}
+              style={{ ...style, display: char === " " ? "inline" : "inline-block" }}
+              animate={getLetterAnim(index)}
+              transition={spring}
+              onMouseEnter={() => setHoveredIndex(index)}
+              onMouseLeave={() => setHoveredIndex(null)}
             >
               {displayChar}
-            </span>
+            </motion.span>
           );
         })}
       </motion.span>
@@ -170,7 +185,7 @@ export const EncryptedText: React.FC<EncryptedTextProps> = ({
             WebkitBackgroundClip: "text",
             backgroundClip: "text",
             WebkitTextFillColor: "transparent",
-            WebkitTextStrokeColor: "transparent", // Hide stroke on shimmer layer to keep it clean
+            WebkitTextStrokeColor: "transparent",
           }}
           animate={{
             backgroundPosition: ["100% 0", "-100% 0"],
@@ -190,9 +205,14 @@ export const EncryptedText: React.FC<EncryptedTextProps> = ({
                 : (scrambleCharsRef.current[index] ??
                   generateRandomCharacter(charset));
             return (
-              <span key={index} style={style}>
+              <motion.span
+                key={index}
+                style={{ ...style, display: char === " " ? "inline" : "inline-block" }}
+                animate={getLetterAnim(index)}
+                transition={spring}
+              >
                 {displayChar}
-              </span>
+              </motion.span>
             );
           })}
         </motion.span>
