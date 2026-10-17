@@ -33,6 +33,19 @@ interface PuzzleResult {
 
 const GAMES = ["Queens", "Tango", "Patches", "Zip", "Wend", "Pinpoint"];
 
+/**
+ * Outlier thresholds (in seconds) for timed games.
+ * Puzzles with solve times exceeding these thresholds are considered outliers
+ * and can be hidden from the chart to prevent compressing normal results.
+ */
+const OUTLIER_THRESHOLDS: Record<string, number> = {
+  Queens: 150, // 2:30 (Median: 25s, P95: 145s, Max: 1009s)
+  Tango: 90,   // 1:30 (Median: 31s, P95: 95s, Max: 145s)
+  Patches: 90, // 1:30 (Median: 17s, P95: 89s, Max: 288s)
+  Zip: 60,     // 1:00 (Median: 12s, P95: 82s, Max: 833s)
+  Wend: 200,   // 3:20 (Median: 40s, P95: 250s, Max: 359s)
+};
+
 // TODO: fill in legacy values
 const legacyValues: Record<string, { pb: string; streak: number }> = {
   Queens: { pb: "0:05", streak: 190 },
@@ -254,7 +267,10 @@ function LegacyBadge() {
 
 interface ChartDataPoint {
   puzzle_number: number;
-  value: number;
+  value: number | null;
+  rawTime: number | null;
+  isOutlier: boolean;
+  outlierIndicator: number | null;
   rollingAvg: number | null;
   date: string;
   id: number;
@@ -266,24 +282,50 @@ interface ChartTooltipProps {
     payload: ChartDataPoint;
   }>;
   game: string;
+  threshold?: number;
+  hideOutliers?: boolean;
 }
 
-function ChartTooltip({ active, payload, game }: ChartTooltipProps) {
+function ChartTooltip({
+  active,
+  payload,
+  game,
+  threshold,
+  hideOutliers,
+}: ChartTooltipProps) {
   if (!active || !payload || payload.length === 0) return null;
   const data = payload[0].payload;
+  const isHiddenOutlier = !isPinpoint(game) && data.isOutlier && hideOutliers;
+
   return (
-    <div className="bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 shadow-xl">
-      <p className="text-xs font-bold text-white">
-        #{data.puzzle_number}
-      </p>
+    <div className="bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 shadow-xl min-w-[140px]">
+      <div className="flex items-center justify-between gap-3 mb-1">
+        <p className="text-xs font-bold text-white">#{data.puzzle_number}</p>
+        {!isPinpoint(game) && data.isOutlier && (
+          <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30">
+            Outlier
+          </span>
+        )}
+      </div>
       <p className="text-[10px] text-neutral-400">{data.date}</p>
-      <p className="text-sm font-bold text-red-400 mt-1">
-        {isPinpoint(game)
-          ? data.value === 6 ? "Didn't Guess" : `${data.value} guess${data.value !== 1 ? "es" : ""}`
-          : formatTime(data.value)}
-      </p>
+      <div className="mt-1">
+        <p className="text-sm font-bold text-red-400">
+          {isPinpoint(game)
+            ? data.rawTime === 6
+              ? "Didn't Guess"
+              : `${data.rawTime} guess${data.rawTime !== 1 ? "es" : ""}`
+            : data.rawTime !== null
+              ? formatTime(data.rawTime)
+              : "—"}
+        </p>
+        {isHiddenOutlier && threshold !== undefined && (
+          <p className="text-[10px] text-neutral-400 mt-0.5">
+            Hidden from line (&gt; {formatTime(threshold)})
+          </p>
+        )}
+      </div>
       {data.rollingAvg !== null && (
-        <p className="text-[10px] text-orange-400 mt-0.5">
+        <p className="text-[10px] text-orange-400 mt-1">
           7-day Average:{" "}
           {isPinpoint(game)
             ? data.rollingAvg.toFixed(1)
@@ -291,6 +333,88 @@ function ChartTooltip({ active, payload, game }: ChartTooltipProps) {
         </p>
       )}
     </div>
+  );
+}
+
+interface OutlierDotProps {
+  cx?: number;
+  cy?: number;
+  payload?: ChartDataPoint;
+}
+
+interface OutlierActiveDotProps extends OutlierDotProps {
+  onSelect?: (payload: ChartDataPoint) => void;
+}
+
+function OutlierDot(props: OutlierDotProps) {
+  const { cx, cy, payload } = props;
+  if (!payload || !payload.isOutlier || cx === undefined || cy === undefined) return null;
+
+  return (
+    <g className="cursor-pointer">
+      {/* Subtle dashed vertical drop line down to the axis line */}
+      <line
+        x1={cx}
+        y1={cy + 8}
+        x2={cx}
+        y2={255}
+        stroke="#ef4444"
+        strokeWidth={1}
+        strokeDasharray="2 3"
+        strokeOpacity={0.35}
+      />
+      {/* Outer halo beacon ring */}
+      <circle
+        cx={cx}
+        cy={cy}
+        r={8}
+        fill="#ef4444"
+        fillOpacity={0.15}
+        stroke="#ef4444"
+        strokeOpacity={0.4}
+        strokeWidth={1}
+      />
+      {/* Upward chevron indicating off-chart value */}
+      <polygon
+        points={`${cx},${cy - 5} ${cx - 4},${cy + 3} ${cx + 4},${cy + 3}`}
+        fill="#ef4444"
+        stroke="#ffffff"
+        strokeWidth={0.8}
+      />
+    </g>
+  );
+}
+
+function OutlierActiveDot(props: OutlierActiveDotProps) {
+  const { cx, cy, payload, onSelect } = props;
+  if (!payload || !payload.isOutlier || cx === undefined || cy === undefined) return null;
+
+  return (
+    <g
+      className="cursor-pointer"
+      onClick={(e) => {
+        e.stopPropagation();
+        if (onSelect) {
+          onSelect(payload);
+        }
+      }}
+    >
+      <circle
+        cx={cx}
+        cy={cy}
+        r={12}
+        fill="#ef4444"
+        fillOpacity={0.3}
+        stroke="#ef4444"
+        strokeWidth={1.5}
+      />
+      <polygon
+        points={`${cx},${cy - 6} ${cx - 5},${cy + 4} ${cx + 5},${cy + 4}`}
+        fill="#f87171"
+        stroke="#ffffff"
+        strokeWidth={1.2}
+      />
+    </g>
   );
 }
 
@@ -418,6 +542,9 @@ function GameTab({
   grouped: Record<string, PuzzleResult[]>;
 }) {
   const [selectedPoint, setSelectedPoint] = useState<PuzzleResult | null>(null);
+  const [hideOutliers, setHideOutliers] = useState(true);
+
+  const threshold = OUTLIER_THRESHOLDS[game];
 
   const stats = useMemo(
     () => calculateStats(results, game, grouped),
@@ -426,36 +553,76 @@ function GameTab({
   const legacy = legacyValues[game];
 
   const extendedResults = useMemo(() => {
-    let baseData = [...results];
-    
+    const baseData = [...results];
+
     if (isPinpoint(game) && grouped["Queens"]) {
       const pinpointPuzzleNumbers = new Set(results.map((r) => r.puzzle_number));
       const queensResults = grouped["Queens"];
-      
-      queensResults.forEach(qr => {
+
+      queensResults.forEach((qr) => {
         if (!pinpointPuzzleNumbers.has(qr.puzzle_number)) {
-           baseData.push({
-             id: -qr.puzzle_number,
-             game: "Pinpoint",
-             puzzle_number: qr.puzzle_number,
-             time_seconds: null,
-             guesses: 6,
-             created_at: qr.created_at
-           });
+          baseData.push({
+            id: -qr.puzzle_number,
+            game: "Pinpoint",
+            puzzle_number: qr.puzzle_number,
+            time_seconds: null,
+            guesses: 6,
+            created_at: qr.created_at,
+          });
         }
       });
     }
     return baseData.sort((a, b) => a.puzzle_number - b.puzzle_number);
   }, [results, game, grouped]);
 
+  const outlierCount = useMemo(() => {
+    if (isPinpoint(game) || threshold === undefined) return 0;
+    return results.filter(
+      (r) => r.time_seconds !== null && r.time_seconds > threshold,
+    ).length;
+  }, [results, game, threshold]);
+
+  const yCeiling = useMemo(() => {
+    if (isPinpoint(game)) return 6;
+    if (!threshold) return "auto";
+    const times = results
+      .map((r) => r.time_seconds)
+      .filter((t): t is number => t !== null);
+    if (times.length === 0) return 60;
+
+    if (hideOutliers) {
+      const normalTimes = times.filter((t) => t <= threshold);
+      const maxNormal = normalTimes.length > 0 ? Math.max(...normalTimes) : threshold;
+      const step = maxNormal > 120 ? 30 : 15;
+      return Math.ceil((maxNormal * 1.15) / step) * step;
+    } else {
+      const maxAll = Math.max(...times);
+      const step = maxAll > 300 ? 60 : 30;
+      return Math.ceil((maxAll * 1.1) / step) * step;
+    }
+  }, [results, game, threshold, hideOutliers]);
+
   const chartData = useMemo((): ChartDataPoint[] => {
-    const raw = extendedResults.map((r) => ({
-      puzzle_number: r.puzzle_number,
-      value: isPinpoint(game) ? (r.guesses ?? 0) : (r.time_seconds ?? 0),
-      date: formatDate(r.created_at),
-      id: r.id,
-      rollingAvg: null as number | null,
-    }));
+    const raw = extendedResults.map((r) => {
+      const rawTime = isPinpoint(game) ? (r.guesses ?? 0) : (r.time_seconds ?? 0);
+      const isOutlier =
+        !isPinpoint(game) &&
+        r.time_seconds !== null &&
+        threshold !== undefined &&
+        r.time_seconds > threshold;
+
+      return {
+        puzzle_number: r.puzzle_number,
+        value: isOutlier && hideOutliers ? null : rawTime,
+        rawTime,
+        isOutlier,
+        outlierIndicator:
+          isOutlier && hideOutliers && typeof yCeiling === "number" ? yCeiling : null,
+        date: formatDate(r.created_at),
+        id: r.id,
+        rollingAvg: null as number | null,
+      };
+    });
 
     // Compute 7-day rolling average
     const WINDOW = 7;
@@ -463,27 +630,50 @@ function GameTab({
       const windowStart = Math.max(0, i - WINDOW + 1);
       const windowSlice = raw.slice(windowStart, i + 1);
 
-      // For Pinpoint, exclude "failed" (value=6) entries from the average
-      const validValues = isPinpoint(game)
-        ? windowSlice.filter((d) => d.value !== 6 && d.value > 0).map((d) => d.value)
-        : windowSlice.map((d) => d.value);
+      if (isPinpoint(game)) {
+        // For Pinpoint, exclude "failed" (value=6) entries from the average
+        const validValues = windowSlice
+          .filter((d) => d.rawTime !== 6 && d.rawTime !== null && d.rawTime > 0)
+          .map((d) => d.rawTime as number);
 
-      if (validValues.length > 0) {
-        raw[i].rollingAvg =
-          validValues.reduce((sum, v) => sum + v, 0) / validValues.length;
+        if (validValues.length > 0) {
+          raw[i].rollingAvg =
+            validValues.reduce((sum, v) => sum + v, 0) / validValues.length;
+        }
+      } else {
+        // For timed games: exclude outliers when hideOutliers is true
+        const validValues = hideOutliers
+          ? windowSlice
+              .filter((d) => !d.isOutlier && d.rawTime !== null)
+              .map((d) => d.rawTime as number)
+          : windowSlice
+              .filter((d) => d.rawTime !== null)
+              .map((d) => d.rawTime as number);
+
+        if (validValues.length > 0) {
+          raw[i].rollingAvg =
+            validValues.reduce((sum, v) => sum + v, 0) / validValues.length;
+        }
       }
     }
 
     return raw;
-  }, [extendedResults, game]);
+  }, [extendedResults, game, threshold, hideOutliers, yCeiling]);
 
-  const average = useMemo(() => {
-    const validData = isPinpoint(game) ? chartData.filter(d => d.value !== 6 && d.value > 0) : chartData;
-    if (validData.length === 0) return 0;
-    return (
-      validData.reduce((sum, d) => sum + d.value, 0) / validData.length
-    );
-  }, [chartData, game]);
+  // Overall average remains unaffected by hiding outliers to preserve true stats
+  const allTimeAverage = useMemo(() => {
+    if (isPinpoint(game)) {
+      const valid = extendedResults
+        .map((r) => r.guesses)
+        .filter((g): g is number => g !== null && g > 0 && g !== 6);
+      return valid.length > 0 ? valid.reduce((a, b) => a + b, 0) / valid.length : 0;
+    } else {
+      const times = extendedResults
+        .map((r) => r.time_seconds)
+        .filter((t): t is number => t !== null);
+      return times.length > 0 ? times.reduce((a, b) => a + b, 0) / times.length : 0;
+    }
+  }, [extendedResults, game]);
 
   if (!stats) {
     return (
@@ -507,10 +697,7 @@ function GameTab({
       {/* Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
         <StatCard label="Best" value={stats.best} accent />
-        <StatCard
-          label="Average"
-          value={stats.average}
-        />
+        <StatCard label="Average" value={stats.average} />
         {stats.total !== null && (
           <StatCard label="Total Time" value={stats.total} />
         )}
@@ -543,13 +730,53 @@ function GameTab({
 
       {/* Line Chart */}
       <div className="p-4 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/60">
-        <h4 className="text-[10px] uppercase font-bold tracking-[0.15em] text-neutral-400 dark:text-neutral-500 mb-4">
-          {isPinpoint(game) ? "Guesses" : "Time"} by Puzzle
-        </h4>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+          <h4 className="text-[10px] uppercase font-bold tracking-[0.15em] text-neutral-400 dark:text-neutral-500">
+            {isPinpoint(game) ? "Guesses" : "Time"} by Puzzle
+          </h4>
+          {!isPinpoint(game) && threshold !== undefined && (
+            <div className="flex items-center gap-2.5">
+              {outlierCount > 0 && (
+                <span
+                  className={`text-[10px] font-medium px-2 py-0.5 rounded-full border transition-colors ${
+                    hideOutliers
+                      ? "bg-red-500/10 text-red-400 border-red-500/20"
+                      : "bg-neutral-200/60 dark:bg-neutral-700/50 text-neutral-500 dark:text-neutral-400 border-neutral-300 dark:border-neutral-600"
+                  }`}
+                >
+                  {outlierCount} {hideOutliers ? "hidden" : "shown"}
+                </span>
+              )}
+              <label className="inline-flex items-center gap-2 cursor-pointer select-none text-xs text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white transition-colors">
+                <input
+                  type="checkbox"
+                  checked={hideOutliers}
+                  onChange={(e) => setHideOutliers(e.target.checked)}
+                  className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-red-600 focus:ring-red-500 focus:ring-offset-0 bg-neutral-100 dark:bg-neutral-800 cursor-pointer accent-red-600"
+                />
+                <span className="font-medium text-xs">
+                  Hide outliers
+                  <span className="ml-1 text-[11px] text-neutral-400 dark:text-neutral-500">
+                    (&gt; {formatTime(threshold)})
+                  </span>
+                </span>
+              </label>
+            </div>
+          )}
+        </div>
         <ResponsiveContainer width="100%" height={280}>
           <LineChart
             data={chartData}
-            margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
+            margin={{ top: 20, right: 20, left: 10, bottom: 5 }}
+            onClick={(nextState) => {
+              if (nextState && nextState.activeLabel !== undefined) {
+                const pNum = Number(nextState.activeLabel);
+                const point = extendedResults.find(
+                  (r) => r.puzzle_number === pNum,
+                );
+                if (point) setSelectedPoint(point);
+              }
+            }}
           >
             <XAxis
               dataKey="puzzle_number"
@@ -571,7 +798,7 @@ function GameTab({
               tickFormatter={(val: number) =>
                 isPinpoint(game) ? (val === 6 ? "Failed" : String(val)) : formatTime(val)
               }
-              domain={isPinpoint(game) ? [0, 6] : ["auto", "auto"]}
+              domain={isPinpoint(game) ? [0, 6] : [0, yCeiling]}
               label={{
                 value: isPinpoint(game) ? "Guesses" : "Time",
                 angle: -90,
@@ -582,16 +809,22 @@ function GameTab({
               }}
             />
             <Tooltip
-              content={<ChartTooltip game={game} />}
+              content={
+                <ChartTooltip
+                  game={game}
+                  threshold={threshold}
+                  hideOutliers={hideOutliers}
+                />
+              }
               cursor={{ stroke: "#525252", strokeDasharray: "4 4" }}
             />
             <ReferenceLine
-              y={average}
+              y={allTimeAverage}
               stroke="#f87171"
               strokeDasharray="6 4"
               strokeOpacity={0.5}
               label={{
-                value: `Avg: ${isPinpoint(game) ? average.toFixed(1) : formatTime(Math.round(average))}`,
+                value: `Avg: ${isPinpoint(game) ? allTimeAverage.toFixed(1) : formatTime(Math.round(allTimeAverage))}`,
                 position: "insideTopRight",
                 fill: "#f87171",
                 fontSize: 10,
@@ -608,12 +841,34 @@ function GameTab({
               activeDot={false}
               connectNulls
             />
+            {hideOutliers && !isPinpoint(game) && (
+              <Line
+                type="monotone"
+                dataKey="outlierIndicator"
+                name="Outlier"
+                stroke="transparent"
+                legendType="none"
+                isAnimationActive={false}
+                dot={<OutlierDot />}
+                activeDot={
+                  <OutlierActiveDot
+                    onSelect={(payload: ChartDataPoint) => {
+                      const point = extendedResults.find(
+                        (r) => r.puzzle_number === payload.puzzle_number,
+                      );
+                      if (point) setSelectedPoint(point);
+                    }}
+                  />
+                }
+              />
+            )}
             <Line
               type="monotone"
               dataKey="value"
               name="Result"
               stroke="#ef4444"
               strokeWidth={2}
+              connectNulls
               dot={{
                 r: 4,
                 fill: "#1c1c1c",
@@ -627,10 +882,12 @@ function GameTab({
                 stroke: "#fff",
                 strokeWidth: 2,
                 cursor: "pointer",
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 onClick: (_: any, payload: any) => {
                   const point = extendedResults.find(
                     (r) =>
-                      r.puzzle_number === payload?.payload?.puzzle_number || r.puzzle_number === payload?.puzzle_number,
+                      r.puzzle_number === payload?.payload?.puzzle_number ||
+                      r.puzzle_number === payload?.puzzle_number,
                   );
                   if (point) setSelectedPoint(point);
                 },
@@ -646,7 +903,7 @@ function GameTab({
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          className="flex items-center gap-6 p-4 rounded-xl border border-red-500/20 bg-red-950/10"
+          className="flex flex-wrap items-center gap-4 sm:gap-6 p-4 rounded-xl border border-red-500/20 bg-red-950/10"
         >
           <div className="flex flex-col gap-1">
             <span className="text-[10px] uppercase font-bold tracking-widest text-neutral-500">
@@ -656,7 +913,7 @@ function GameTab({
               {selectedPoint.game} #{selectedPoint.puzzle_number}
             </span>
           </div>
-          <div className="h-10 w-px bg-neutral-700" />
+          <div className="h-10 w-px bg-neutral-700 hidden sm:block" />
           <div className="flex flex-col gap-1">
             <span className="text-[10px] uppercase font-bold tracking-widest text-neutral-500">
               Date
@@ -665,22 +922,34 @@ function GameTab({
               {formatDate(selectedPoint.created_at)}
             </span>
           </div>
-          <div className="h-10 w-px bg-neutral-700" />
+          <div className="h-10 w-px bg-neutral-700 hidden sm:block" />
           <div className="flex flex-col gap-1">
             <span className="text-[10px] uppercase font-bold tracking-widest text-neutral-500">
               {isPinpoint(game) ? "Guesses" : "Time"}
             </span>
-            <span className="text-sm font-bold text-red-400">
-              {isPinpoint(game)
-                ? selectedPoint.guesses === 6 ? "Didn't guess" : `${selectedPoint.guesses} guess${selectedPoint.guesses !== 1 ? "es" : ""}`
-                : selectedPoint.time_seconds !== null
-                  ? formatTime(selectedPoint.time_seconds)
-                  : "—"}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-red-400">
+                {isPinpoint(game)
+                  ? selectedPoint.guesses === 6
+                    ? "Didn't guess"
+                    : `${selectedPoint.guesses} guess${selectedPoint.guesses !== 1 ? "es" : ""}`
+                  : selectedPoint.time_seconds !== null
+                    ? formatTime(selectedPoint.time_seconds)
+                    : "—"}
+              </span>
+              {!isPinpoint(game) &&
+                selectedPoint.time_seconds !== null &&
+                threshold !== undefined &&
+                selectedPoint.time_seconds > threshold && (
+                  <span className="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-red-500/20 text-red-400 border border-red-500/30">
+                    Outlier (&gt; {formatTime(threshold)})
+                  </span>
+                )}
+            </div>
           </div>
           <button
             onClick={() => setSelectedPoint(null)}
-            className="ml-auto text-neutral-500 hover:text-white transition-colors text-xs"
+            className="ml-auto text-neutral-500 hover:text-white transition-colors text-xs p-1"
             aria-label="Dismiss"
           >
             ✕
