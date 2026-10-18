@@ -7,6 +7,9 @@
     <title>Michael Dunne</title>
     <meta name="description" content="My personal portfolio" />
 
+    <link rel="canonical" href="https://michaeldunne.ca/" />
+    <meta name="author" content="Michael Dunne" />
+
     <!-- Open Graph / iMessage / WhatsApp / Social -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://michaeldunne.ca/" />
@@ -17,9 +20,30 @@
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="Michael Dunne" />
     <meta name="twitter:description" content="My personal portfolio" />
+
+    <!-- Structured Data (Schema.org) for Personal Brand SEO -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Michael Dunne",
+        "url": "https://michaeldunne.ca/",
+        "sameAs": [
+          "https://www.linkedin.com/in/michaeldunner",
+          "https://github.com/michaeldunner",
+          "https://letterboxd.com/michaeldunner/"
+        ]
+      }
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <noscript>
+        <h1>Michael Dunne</h1>
+        <p>Personal portfolio and software projects by Michael Dunne.</p>
+        <p><a href="https://www.linkedin.com/in/michaeldunner">LinkedIn</a> | <a href="https://github.com/michaeldunner">GitHub</a></p>
+      </noscript>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

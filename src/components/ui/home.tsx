@@ -13,7 +13,7 @@ function Home() {
   return (
     <div className="flex flex-1 min-h-screen">
       <div className="relative flex min-h-screen w-full flex-col items-center justify-start rounded-tl-2xl border border-neutral-200 bg-white p-2 dark:border-neutral-700 dark:bg-neutral-900">
-        <div className="relative z-20 mt-10 mb-8 flex shrink-0 justify-center md:absolute md:top-10 md:my-0">
+        <h1 className="relative z-20 mt-10 mb-8 flex shrink-0 justify-center md:absolute md:top-10 md:my-0">
           <EncryptedText
             text="Michael Dunne"
             encryptedClassName="text-yellow-500"
@@ -25,7 +25,7 @@ function Home() {
               WebkitTextStroke: "3px #296aa2",
             }}
           />
-        </div>
+        </h1>
 
         <motion.div
           initial="hidden"
