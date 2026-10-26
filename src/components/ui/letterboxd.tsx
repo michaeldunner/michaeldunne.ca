@@ -1,5 +1,5 @@
 import { PokemonCard } from "./pokemon-card";
-import { LetterboxdResponse } from "../../assets/types";
+import { LetterboxdFilm } from "../../assets/types";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { FastAverageColor } from "fast-average-color";
@@ -8,11 +8,11 @@ import charizard from "../../assets/charizard.jpg";
 const fac = new FastAverageColor();
 
 export function LetterboxdCard() {
-  const { data, isPending } = useQuery<LetterboxdResponse>({
+  const { data, isPending } = useQuery<LetterboxdFilm>({
     queryKey: ["Recent Film"],
     queryFn: async () => {
       const response = await fetch(
-        "https://api.rss2json.com/v1/api.json?rss_url=https://letterboxd.com/michaeldunner/rss/",
+        "https://letterboxd-worker.mdunne697.workers.dev/",
       );
       if (!response.ok) throw new Error("Failed to fetch");
       return response.json();
@@ -21,37 +21,14 @@ export function LetterboxdCard() {
     staleTime: 300000,
   });
 
-  const latestItem = data?.items?.[0];
-  const hasItem = !!latestItem;
-  const link = latestItem?.link || "https://letterboxd.com/michaeldunner/";
+  const hasItem = !!data?.title;
+  const link = data?.link || "https://letterboxd.com/michaeldunner/";
+  const movieTitle = data?.title
+    ? `${data.title}${data.year ? ` (${data.year})` : ""}`
+    : "Letterboxd";
+  const ratingText = data?.stars || data?.rating || "";
+  const imageURL = data?.poster || undefined;
 
-  // Parse Title and Rating
-  // RSS Title formats:
-  // "Movie (Year) ★★★½" (Watched/Reviewed)
-  // "Movie (Year)" (Watched, no rating)
-  const rawTitle = latestItem?.title || "";
-  let movieTitle = rawTitle;
-  let rating = "";
-
-  // Extract Rating (looking for stars at the end)
-  const ratingMatch = rawTitle.match(/(★|½)+$/);
-  if (ratingMatch) {
-    rating = ratingMatch[0];
-    movieTitle = rawTitle.replace(rating, "").trim();
-    // Remove trailing comma or hyphen if present after removing rating
-    // RSS2JSON title often comes as "Title, Year - Rating"
-    movieTitle = movieTitle.replace(/[, -]+$/, "").trim();
-  }
-
-  // Extract Image
-  // RSS2JSON tries to put it in thumbnail, otherwise regex the description
-  let imageURL = latestItem?.thumbnail;
-  if (!imageURL && latestItem?.description) {
-    const imgMatch = latestItem.description.match(/src="([^"]+)"/);
-    if (imgMatch) {
-      imageURL = imgMatch[1];
-    }
-  }
   // While the query is still in flight, pass undefined so PokemonCard shows its skeleton.
   // Only fall back to Charizard if the API responded but returned no image.
   const finalImage = isPending ? undefined : imageURL || charizard;
@@ -60,12 +37,16 @@ export function LetterboxdCard() {
   const [bgColor, setBgColor] = useState<string | undefined>(undefined);
 
   // Determine the background color: dynamic if loaded, default hex if not
-  const finalBackgroundColor = isPending ? undefined : (hasItem && bgColor ? bgColor : "#10B981");
+  const finalBackgroundColor = isPending
+    ? undefined
+    : hasItem && bgColor
+      ? bgColor
+      : "#10B981";
 
   useEffect(() => {
     if (hasItem && imageURL) {
       fac
-        .getColorAsync(`https://wsrv.nl/?url=${imageURL}&w=100`)
+        .getColorAsync(`https://wsrv.nl/?url=${encodeURIComponent(imageURL)}&w=100`)
         .then((color) => {
           setBgColor(color.hex);
         })
@@ -85,7 +66,7 @@ export function LetterboxdCard() {
       backgroundColor={finalBackgroundColor}
       name={"Recent Film"}
       title={hasItem ? movieTitle : "Letterboxd"}
-      text={hasItem ? rating : "No recent activity"}
+      text={hasItem ? ratingText : "No recent activity"}
       to={link}
     />
   );

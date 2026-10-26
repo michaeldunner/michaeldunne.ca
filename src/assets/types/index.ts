@@ -13,6 +13,16 @@ export interface SpotifyNotPlaying {
 
 export type SpotifyResponse = SpotifyNowPlaying | SpotifyNotPlaying;
 
+export interface LetterboxdFilm {
+  title: string;
+  year: string | null;
+  rating: string | null;
+  stars: string | null;
+  watchedDate: string | null;
+  link: string | null;
+  poster: string | null;
+}
+
 export interface LetterboxdItem {
   title: string;
   pubDate: string;
